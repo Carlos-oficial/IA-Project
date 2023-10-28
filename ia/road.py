@@ -1,4 +1,4 @@
-from place import Place
+from ia.place import Place
 
 
 class Road:
@@ -7,7 +7,7 @@ class Road:
         self.to: Place = to
         self.length = length
         self.open = True
-    
+
     def vel_cap(self):
         if not self.open:
             return 0
