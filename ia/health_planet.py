@@ -21,9 +21,8 @@ class HealthPlanet:
             self.wharehouses[place_name] = {"place": place, "products": products}
             for product in products:
                 self.register_product(product)
-            print(self.wharehouses)
         except Exception as e:
-            print(e)
+            print(e,f"in {self}.add_warehouse({place_name, products: set[Product]})")
         finally:
             return
 
@@ -36,14 +35,15 @@ class HealthPlanet:
         ]
     
      
-    def order_product(self, client_place: str, product: Product,ammount:int = 1):
+    def order_product(self, client_place: str, product_name,ammount:int = 1):
         try:
-            place: Place = self.map.get_place(client_place)
-            order_wheight:float = product.weight*ammount
+            self.map.get_place(client_place)
+            # order_wheight:float = product.weight*ammount
+            src = self._wharehouses_with_product(product_name)[0]
+            print(self.map.calculate_path(src.name,client_place))
             
-            print(self.wharehouses)
         except Exception as e:
-            print(e)
+            print(e, f"in {self}.order_product({client_place: str, product_name: str})")
         finally:
             return
         pass

@@ -1,9 +1,10 @@
-from typing import Dict, Set
+from typing import Dict, Set, List
 
 import networkx as nx
 
 from ia.place import Place
 from ia.road import Road
+from ia.veichle import Veichle
 
 
 class Map:
@@ -35,6 +36,12 @@ class Map:
             raise Exception("Place not found")
         return ret
 
+    def get_road(self, src:str,dest:str) -> Road:
+        for road in self.roads:
+            if road.src.name == src and road.to.name == dest:
+                return road
+        return nil
+
     def networkx_graph(self):
         """
         converte um mapa para um grafo da biblioteca networkx
@@ -47,8 +54,18 @@ class Map:
             G.add_edge(road.src.name, road.to.name, road=road) # temos a informação sobre as estradas, e esta é mutável
         return G
 
-    def calculate_path(self, src,dest):
-        return nx.shortest_path(self.networkx_graph(), source = src, target=dest,weight=lambda _,_,x: x.road.length/x.road.vel_cap() if x.road.vel_cap() != 0 else 10000000) 
+    def calculate_path(self, src:str,dest:str):
+        print(src)
+        print(self.places.keys())
+        if src not in self.places.keys() or dest not in self.places.keys():
+            raise Exception("source and/or destination not found")
+        return nx.shortest_path(self.networkx_graph(), source = src, target=dest,weight=lambda a,b,x: x["road"].length/x["road"].vel_cap() if x["road"].vel_cap() != 0 else 10000000) 
     
-    
+    def path_length(self,path:List[str]):
+        pairs:Tuple[str,str] = zip(path,path[1:])
+        ret = 0
+        for pair in pairs:
+            road = self.get_road(*pair)
+            ret+=road.length
+        return ret
     # end def

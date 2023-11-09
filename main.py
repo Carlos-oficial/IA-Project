@@ -41,23 +41,22 @@ mapa.add_road(Guarda, Viseu, 45)
 mapa.add_road(Aveiro, Faro, 410)
 
 enterprise = HealthPlanet(mapa)
-# enterprise.add_warehouse("Braga", {Product("Arroz", 1.5)})
-# enterprise.order_products("Faro", {Product("Arroz", 2)})
-# print(enterprise._wharehouses_with_product("Arroz"))
+enterprise.add_warehouse("Braga", {Product("Arroz", 1.5)})
+enterprise.order_product("Faro","Arroz")
+print(enterprise.map.path_length(enterprise.map.calculate_path("Braga", "Porto")))
+# # Define a layout
+# for k,v in nx.get_edge_attributes(G, "road").items():
+#     v.open = not v.open
 
-G = mapa.networkx_graph()
-# Define a layout
-pos = nx.spring_layout(G)
-for k,v in nx.get_edge_attributes(G, "road").items():
-    v.open = not v.open
-
-for k,v in nx.get_edge_attributes(G, "road").items():
-    print(k,":",v.__dict__)
+# for k,v in nx.get_edge_attributes(G, "road").items():
+#     print(k,":",v.__dict__)
     
 # Draw the graph
-# nx.draw(
-#     G,
-#     pos,
-#     with_labels=True,
-# )
-# plt.savefig("mapa.png")
+G = mapa.networkx_graph()
+pos = nx.spring_layout(G)
+nx.draw(
+    G,
+    pos,
+    with_labels=True,
+)
+plt.savefig("mapa.png")
