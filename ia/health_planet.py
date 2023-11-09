@@ -2,18 +2,23 @@ from ia.place import Place
 from ia.map import Map
 from ia.product import Product
 from typing import Dict, Set
+from typing_extensions import TypedDict
 import networkx as nx
 
+
+
+
 class HealthPlanet:
+    Wharehouse = TypedDict('Wharehouse', {'place': Place, 'products': Set[Product]})
     def __init__(self, map: Map):
         self.map: Map = map
-        self.wharehouses: Dict[str, Dict[str, Place | Set[Product]]] = {}
-        self.selling_products: Dict[str:Product] = {}
+        self.wharehouses: Dict[str,HealthPlanet.Wharehouse] = dict({})
+        self.selling_products: Dict[str,Product] = dict({})
 
     def register_product(self, product: Product, *wharehouses):
         self.selling_products[product.name] = product
-        for wharehouses in wharehouses:
-            self.wharehouses[wharehouses]["products"].add(product)
+        for wharehouse in wharehouses:
+            self.wharehouses[wharehouse]["products"].add(product)
 
     def add_warehouse(self, place_name, products: set[Product]):
         try:

@@ -1,6 +1,7 @@
-class Product:
-    names = []
+from typing import List
 
+class Product:
+    names :List[str] = []
     def __init__(self, name, weight):
         self.weight = weight
         if name not in Product.names:

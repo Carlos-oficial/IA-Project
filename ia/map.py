@@ -18,8 +18,8 @@ class Map:
     Os nodos são objetos da classe Place, e as arestas são Roads
     """
 
-    def __init__(self):
-        self.places: Dict[str, Place] = {}
+    def __init__(self) -> None:
+        self.places: Dict[str, Place] = dict({})
         self.roads: Set[Road] = set({})
 
     def add_road(self, place1: Place, place2: Place, length):
@@ -40,7 +40,7 @@ class Map:
         for road in self.roads:
             if road.src.name == src and road.to.name == dest:
                 return road
-        return nil
+        raise Exception("Road not found")
 
     def networkx_graph(self):
         """
@@ -61,10 +61,9 @@ class Map:
             raise Exception("source and/or destination not found")
         return nx.shortest_path(self.networkx_graph(), source = src, target=dest,weight=lambda a,b,x: x["road"].length/x["road"].vel_cap() if x["road"].vel_cap() != 0 else 10000000) 
     
-    def path_length(self,path:List[str]):
-        pairs:Tuple[str,str] = zip(path,path[1:])
-        ret = 0
-        for pair in pairs:
+    def path_length(self,path:List[str]) -> float:
+        ret :float= 0.
+        for pair in zip(path,path[1:]):
             road = self.get_road(*pair)
             ret+=road.length
         return ret
