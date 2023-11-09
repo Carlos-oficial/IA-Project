@@ -2,11 +2,11 @@ from ia.place import Place
 
 
 class Road:
-    def __init__(self, src, to, length) ->None:
+    def __init__(self, src, to, length) -> None:
         self.src: Place = src
         self.to: Place = to
-        self.length :float= length
-        self.open :bool= True
+        self.length: float = length
+        self.open: bool = True
 
     def vel_cap(self) -> float:
         if not self.open:

@@ -36,7 +36,7 @@ class Map:
             raise Exception("Place not found")
         return ret
 
-    def get_road(self, src:str,dest:str) -> Road:
+    def get_road(self, src: str, dest: str) -> Road:
         for road in self.roads:
             if road.src.name == src and road.to.name == dest:
                 return road
@@ -51,20 +51,30 @@ class Map:
             G.add_node(node)
 
         for road in self.roads:
-            G.add_edge(road.src.name, road.to.name, road=road) # temos a informação sobre as estradas, e esta é mutável
+            G.add_edge(
+                road.src.name, road.to.name, road=road
+            )  # temos a informação sobre as estradas, e esta é mutável
         return G
 
-    def calculate_path(self, src:str,dest:str):
+    def calculate_path(self, src: str, dest: str):
         print(src)
         print(self.places.keys())
         if src not in self.places.keys() or dest not in self.places.keys():
             raise Exception("source and/or destination not found")
-        return nx.shortest_path(self.networkx_graph(), source = src, target=dest,weight=lambda a,b,x: x["road"].length/x["road"].vel_cap() if x["road"].vel_cap() != 0 else 10000000) 
-    
-    def path_length(self,path:List[str]) -> float:
-        ret :float= 0.
-        for pair in zip(path,path[1:]):
+        return nx.shortest_path(
+            self.networkx_graph(),
+            source=src,
+            target=dest,
+            weight=lambda a, b, x: x["road"].length / x["road"].vel_cap()
+            if x["road"].vel_cap() != 0
+            else 10000000,
+        )
+
+    def path_length(self, path: List[str]) -> float:
+        ret: float = 0.0
+        for pair in zip(path, path[1:]):
             road = self.get_road(*pair)
-            ret+=road.length
+            ret += road.length
         return ret
+
     # end def
