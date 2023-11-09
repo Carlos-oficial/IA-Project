@@ -43,9 +43,12 @@ class Map:
         for node in self.places.keys():
             G.add_node(node)
 
-        for edge in self.roads:
-            G.add_edge(edge.src.name, edge.to.name, weight=edge.length)
-
+        for road in self.roads:
+            G.add_edge(road.src.name, road.to.name, road=road) # temos a informação sobre as estradas, e esta é mutável
         return G
 
+    def calculate_path(self, src,dest):
+        return nx.shortest_path(self.networkx_graph(), source = src, target=dest,weight=lambda _,_,x: x.road.length/x.road.vel_cap() if x.road.vel_cap() != 0 else 10000000) 
+    
+    
     # end def

@@ -2,7 +2,7 @@ from ia.place import Place
 from ia.map import Map
 from ia.product import Product
 from typing import Dict, Set
-
+import networkx as nx
 
 class HealthPlanet:
     def __init__(self, map: Map):
@@ -21,7 +21,6 @@ class HealthPlanet:
             self.wharehouses[place_name] = {"place": place, "products": products}
             for product in products:
                 self.register_product(product)
-            print("done did it")
             print(self.wharehouses)
         except Exception as e:
             print(e)
@@ -35,6 +34,20 @@ class HealthPlanet:
             for wharehouse in self.wharehouses.values()
             if p in wharehouse["products"]
         ]
-
+    
+     
+    def order_product(self, client_place: str, product: Product,ammount:int = 1):
+        try:
+            place: Place = self.map.get_place(client_place)
+            order_wheight:float = product.weight*ammount
+            
+            print(self.wharehouses)
+        except Exception as e:
+            print(e)
+        finally:
+            return
+        pass
+    
     def order_products(self, client_place: str, products: dict[Product, int]):
+        
         pass
