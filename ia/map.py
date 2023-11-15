@@ -25,9 +25,6 @@ class Map:
     def add_road(self, place1: Place, place2: Place, length):
         self.roads.add(Road(place1, place2, length))
 
-    def add_driver(self, name: str, driver: Driver):
-        self.drivers[name] = driver
-
     def get_neighbours(self, place):
         return list(filter(lambda r: r.get_sorce() == place, self.roads))
 

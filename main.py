@@ -8,8 +8,8 @@ from ia.product import Product
 mapa = Map.loader("data.json")
 
 enterprise = HealthPlanet(mapa)
-enterprise.add_warehouse("Braga", {Product("Arroz", 1.5)})
-enterprise.order_product("Faro", "Arroz")
+#enterprise.add_warehouse("Braga", {Product("Arroz", 1.5)})
+#enterprise.order_product("Faro", "Arroz")
 print(enterprise.map.path_length(enterprise.map.calculate_path("Viana do Castelo", "Faro")))
 print(enterprise.map.calculate_path("Viana do Castelo", "Faro"))
 # # Define a layout
