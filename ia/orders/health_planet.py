@@ -53,3 +53,5 @@ class HealthPlanet:
 
     def order_products(self, client_place: str, products: dict[Product, int]):
         pass
+import Place
+import Roa

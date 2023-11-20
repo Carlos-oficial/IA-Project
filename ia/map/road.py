@@ -7,6 +7,10 @@ class Road:
         self.to: Place = to
         self.length: float = length
         self.open: bool = True
+        
+        src-weather = get_weather(src)
+        to-weather = get_weather(to)
+        weather = random.choice(src-weather, to-weather)
 
     def vel_cap(self) -> float:
         if not self.open:
@@ -19,6 +23,9 @@ class Road:
 
     def get_source(self) -> Place:
         return self.src
+    
+    def get_weather(self) -> Weather:
+        return self.weather
 
 
 class FreeWay(Road):
