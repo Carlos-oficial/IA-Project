@@ -39,7 +39,48 @@ class Map:
             if road.src.name == src and road.to.name == dest:
                 return road
         raise Exception("Road not found")
-        
+
+    def path_length(self, path: List[str]) -> float:
+        ret: float = 0.0
+        for pair in zip(path, path[1:]):
+            road = self.get_road(*pair)
+            ret += road.length
+        return ret
+    
+    # Converte um json para Map
+    def loader(file_path: str) -> 'Map':
+        difficulty = self.difficulty
+
+        with open(file_path, 'r') as file:
+            map_data = json.load(file)
+
+        places_data: List[Dict[str, str]] = map_data.get('places', [])
+        roads_data: List[Dict[str, Union[str, int]]] = map_data.get('roads', [])
+
+        my_map = Map()
+
+        # Add places to the map
+        for place_info in places_data:
+            place_name = place_info.get('name')
+            place = Place(name=place_name)
+            # implement weather difficulty
+            my_map.places[place_name] = place
+
+        # Add roads to the map
+        for road_info in roads_data:
+            place1 = my_map.get_place(road_info['place1'])
+            place2 = my_map.get_place(road_info['place2'])
+            length = road_info['length']
+            my_map.add_road(place1, place2, length)
+
+        return my_map
+
+
+    # NETWORKX
+    #
+    #
+    #
+
     def networkx_graph(self):
         """
         converte um mapa para um grafo da biblioteca networkx
@@ -71,37 +112,5 @@ class Map:
             target=dest,
             weight=weight_function,
         )
-
-    def path_length(self, path: List[str]) -> float:
-        ret: float = 0.0
-        for pair in zip(path, path[1:]):
-            road = self.get_road(*pair)
-            ret += road.length
-        return ret
-    
-    # Converte um json para Map
-    def loader(file_path: str) -> 'Map':
-        with open(file_path, 'r') as file:
-            map_data = json.load(file)
-
-        places_data: List[Dict[str, str]] = map_data.get('places', [])
-        roads_data: List[Dict[str, Union[str, int]]] = map_data.get('roads', [])
-
-        my_map = Map()
-
-        # Add places to the map
-        for place_info in places_data:
-            place_name = place_info.get('name')
-            place = Place(name=place_name)
-            my_map.places[place_name] = place
-
-        # Add roads to the map
-        for road_info in roads_data:
-            place1 = my_map.get_place(road_info['place1'])
-            place2 = my_map.get_place(road_info['place2'])
-            length = road_info['length']
-            my_map.add_road(place1, place2, length)
-
-        return my_map
 
     # end def

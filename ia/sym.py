@@ -3,11 +3,11 @@ import Map
 
 class Simulator:
 
-    def def __init__(self, difficulty):
-        self.state = self.__init__()
+    def __init__(self, difficulty):
+        self.state = State()
         self.difficulty = difficulty
-        self.map = map.__init__()
-        self.drivers = []
-        self.orders = []
+        self.map = Map()
+        self.drivers = Dict()
+        self.orders = Dict()
 
 

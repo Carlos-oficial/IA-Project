@@ -8,5 +8,5 @@ class Weather(Enum):
     Mist = 4
 
     def randomize(self):
-        random.choice(list(Weather))
+        return random.choice(list(Weather))
 

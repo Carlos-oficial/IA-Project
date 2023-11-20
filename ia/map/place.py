@@ -1,12 +1,12 @@
 from typing import Dict
-from Weather
+import Weather
 
 
 class Place:
     def __init__(self, name: str):
         self.name = name
         self.storage: Dict[str, int] = {}
-        self.weather = weather.randomize()
+        self.weather = Weather.weather.randomize()
 
     def __hash__(self):
         return hash(self.name)
@@ -16,3 +16,6 @@ class Place:
 
     def get_weather(self):
         return self.weather
+
+    def set_weather(self, weather):
+        self.weather = weather
