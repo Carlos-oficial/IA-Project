@@ -1,4 +1,6 @@
-from ia.place import Place
+import random
+from ia.map.place import Place
+from ia.map.weather import Weather
 
 
 class Road:
@@ -8,9 +10,9 @@ class Road:
         self.length: float = length
         self.open: bool = True
         
-        src-weather = get_weather(src)
-        to-weather = get_weather(to)
-        weather = random.choice(src-weather, to-weather)
+        src_weather = src.get_weather()
+        to_weather = to.get_weather()
+        weather = random.choice(src_weather, to_weather)
 
     def vel_cap(self) -> float:
         if not self.open:
@@ -30,7 +32,6 @@ class Road:
 
 class FreeWay(Road):
     pass
-
 
 class FastQuickWay(Road):
     pass

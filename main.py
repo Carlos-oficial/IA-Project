@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from ia.map import Map
-from ia.health_planet import HealthPlanet
-from ia.product import Product
+from ia.map.map import Map
+from ia.orders.health_planet import HealthPlanet
+from ia.orders.product import Product
 
 mapa = Map.loader("data.json")
 

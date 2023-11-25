@@ -1,5 +1,5 @@
-import State
-import Map
+from ia.state import State
+from ia.map.map import Map
 
 class Simulator:
 

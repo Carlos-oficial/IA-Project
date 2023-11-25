@@ -1,5 +1,5 @@
-from ia.veichle import Veichle
-from ia.place import Place
+from ia.drivers.veichle import Veichle
+from ia.map.place import Place
 
 class Driver:
 

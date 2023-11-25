@@ -1,5 +1,5 @@
 from typing import Dict
-import Weather
+from ia.map.weather import Weather
 
 
 class Place:

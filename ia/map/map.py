@@ -4,8 +4,8 @@ from typing import Dict, Set, List
 
 import networkx as nx
 
-from ia.place import Place
-from ia.road import Road
+from ia.map.place import Place
+from ia.map.road import Road
 
 class Map:
     """

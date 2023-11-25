@@ -1,6 +1,6 @@
-from ia.place import Place
-from ia.map import Map
-from ia.product import Product
+from ia.map.place import Place
+from ia.map.map import Map
+from ia.orders.product import Product
 from typing import Dict, Set
 from typing_extensions import TypedDict
 import networkx as nx
