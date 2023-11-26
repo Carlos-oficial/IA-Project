@@ -12,5 +12,9 @@ class Product:
         else:
             raise Exception("Product already exists")
 
-    def set_price(self):
-        return 0
+    def set_price(self, price):
+        if price <= 0:
+            self.price = price
+        else:
+            raise Exception("Invalid  price (Must be above 0)")
+        
