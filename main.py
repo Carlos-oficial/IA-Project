@@ -3,9 +3,9 @@ import networkx as nx
 
 from ia.map.map import Map
 from ia.orders.health_planet import HealthPlanet
-from ia.orders.product import Product
+#from ia.orders.product import Product
 
-mapa = Map.loader("data.json")
+mapa = Map.loader("map.json")
 
 enterprise = HealthPlanet(mapa)
 #enterprise.add_warehouse("Braga", {Product("Arroz", 1.5)})

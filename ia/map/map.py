@@ -48,9 +48,8 @@ class Map:
         return ret
     
     # Converte um json para Map
+    @staticmethod
     def loader(file_path: str) -> 'Map':
-        difficulty = self.difficulty
-
         with open(file_path, 'r') as file:
             map_data = json.load(file)
 
@@ -63,7 +62,6 @@ class Map:
         for place_info in places_data:
             place_name = place_info.get('name')
             place = Place(name=place_name)
-            # implement weather difficulty
             my_map.places[place_name] = place
 
         # Add roads to the map

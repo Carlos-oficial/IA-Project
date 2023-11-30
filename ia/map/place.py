@@ -6,16 +6,14 @@ class Place:
     def __init__(self, name: str):
         self.name = name
         self.storage: Dict[str, int] = {}
-        self.weather = Weather.weather.randomize()
+        #random weather
+        self.weather: Weather = Weather.randomize()
 
     def __hash__(self):
         return hash(self.name)
 
     def __eq__(self, other):
         return self.name == other.name
-
-    def get_weather(self):
+    
+    def get_weather(self) -> Weather:
         return self.weather
-
-    def set_weather(self, weather):
-        self.weather = weather

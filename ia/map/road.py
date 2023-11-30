@@ -12,7 +12,7 @@ class Road:
         
         src_weather = src.get_weather()
         to_weather = to.get_weather()
-        weather = random.choice(src_weather, to_weather)
+        self.weather = random.choice([src_weather, to_weather])
 
     def vel_cap(self) -> float:
         if not self.open:
