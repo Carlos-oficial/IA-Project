@@ -26,7 +26,7 @@ class Map:
         self.roads.add(Road(place1, place2, length))
 
     def get_neighbours(self, place):
-        return list(filter(lambda r: r.get_sorce() == place, self.roads))
+        return list(filter(lambda r: r.get_source() == place, self.roads))
 
     def get_place(self, name: str) -> Place:
         ret = self.places.get(name)

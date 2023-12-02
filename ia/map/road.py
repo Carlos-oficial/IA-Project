@@ -19,6 +19,28 @@ class Road:
             return 0
         else:
             return 50
+        
+    def get_max_speed(self) -> float:
+        return self.vel_cap()
+    
+    def get_weather_factor(self) -> float:
+        if self.weather == Weather.Mist:
+            return 0.5  
+        elif self.weather == Weather.Rainy:
+            return 0.8  
+        else:
+            return 1.0  # No impact on speed for other weather conditions
+    
+    def max_speed_heuristic(self) -> float:
+        max_speed = self.get_max_speed()
+        length = self.length
+        weather_factor = self.get_weather_factor()
+
+        # Calculate time using maximum speed
+        adjusted_max_speed = max_speed * weather_factor
+        time = length / adjusted_max_speed
+
+        return time
 
     def get_destination(self) -> Place:
         return self.to
