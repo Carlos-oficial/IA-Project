@@ -1,11 +1,11 @@
+from ctypes import Union
+import json
 from typing import Dict, Set, List
 
 import networkx as nx
 
-from ia.place import Place
-from ia.road import Road
-from ia.veichle import Veichle
-
+from ia.map.place import Place
+from ia.map.road import Road
 
 class Map:
     """
@@ -24,11 +24,9 @@ class Map:
 
     def add_road(self, place1: Place, place2: Place, length):
         self.roads.add(Road(place1, place2, length))
-        self.places[place1.name] = place1
-        self.places[place2.name] = place2
 
     def get_neighbours(self, place):
-        return list(filter(lambda r: r.get_sorce() == place, self.roads))
+        return list(filter(lambda r: r.get_source() == place, self.roads))
 
     def get_place(self, name: str) -> Place:
         ret = self.places.get(name)
@@ -41,6 +39,45 @@ class Map:
             if road.src.name == src and road.to.name == dest:
                 return road
         raise Exception("Road not found")
+
+    def path_length(self, path: List[str]) -> float:
+        ret: float = 0.0
+        for pair in zip(path, path[1:]):
+            road = self.get_road(*pair)
+            ret += road.length
+        return ret
+    
+    # Converte um json para Map
+    @staticmethod
+    def loader(file_path: str) -> 'Map':
+        with open(file_path, 'r') as file:
+            map_data = json.load(file)
+
+        places_data: List[Dict[str, str]] = map_data.get('places', [])
+        roads_data: List[Dict[str, Union[str, int]]] = map_data.get('roads', [])
+
+        my_map = Map()
+
+        # Add places to the map
+        for place_info in places_data:
+            place_name = place_info.get('name')
+            place = Place(name=place_name)
+            my_map.places[place_name] = place
+
+        # Add roads to the map
+        for road_info in roads_data:
+            place1 = my_map.get_place(road_info['place1'])
+            place2 = my_map.get_place(road_info['place2'])
+            length = road_info['length']
+            my_map.add_road(place1, place2, length)
+
+        return my_map
+
+
+    # NETWORKX
+    #
+    #
+    #
 
     def networkx_graph(self):
         """
@@ -56,25 +93,22 @@ class Map:
             )  # temos a informação sobre as estradas, e esta é mutável
         return G
 
-    def calculate_path(self, src: str, dest: str):
+    def calculate_path(self, src: str, dest: str) -> List[str]:
         print(src)
         print(self.places.keys())
         if src not in self.places.keys() or dest not in self.places.keys():
             raise Exception("source and/or destination not found")
+        
+        def weight_function(a, b, x) -> float:
+            length_factor = x["road"].length / x["road"].vel_cap() if x["road"].vel_cap() != 0 else 10000000
+            
+            return length_factor
+
         return nx.shortest_path(
             self.networkx_graph(),
             source=src,
             target=dest,
-            weight=lambda a, b, x: x["road"].length / x["road"].vel_cap()
-            if x["road"].vel_cap() != 0
-            else 10000000,
+            weight=weight_function,
         )
-
-    def path_length(self, path: List[str]) -> float:
-        ret: float = 0.0
-        for pair in zip(path, path[1:]):
-            road = self.get_road(*pair)
-            ret += road.length
-        return ret
 
     # end def
