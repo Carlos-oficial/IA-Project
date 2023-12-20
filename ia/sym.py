@@ -1,13 +1,24 @@
-from ia.state import State
 from ia.map.map import Map
 
-class Simulator:
 
-    def __init__(self, difficulty):
-        self.state = State()
-        self.difficulty = difficulty
+class Simulation:
+    class State:
+        def __init__(self):
+            self.clock: int = 0
+
+        def tick(self):
+            self.clock += 1
+
+    class Dificulty:
+        EASY = "easy"
+        NORMAL = "normal"
+
+    def __init__(self):
+        self.state = Simulation.State()
+        self.difficulty = None
         self.map = Map()
-        self.drivers = Dict()
-        self.orders = Dict()
+        self.drivers = dict({})
+        self.orders = dict({})
 
-
+    def run():
+        self.tui

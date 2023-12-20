@@ -17,4 +17,3 @@ class Product:
             self.price = price
         else:
             raise Exception("Invalid  price (Must be above 0)")
-        

@@ -1,8 +1,8 @@
 import uuid
 from ia.map.place import Place
 
-class Order:
 
+class Order:
     def __init__(self, time, place):
         self.id = uuid.uuid1()
         self.time = time
@@ -17,7 +17,3 @@ class Order:
 
     def set_rating(self, rating):
         self.rating = rating
-
-            
-
-        
