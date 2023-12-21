@@ -8,6 +8,9 @@ class Driver:
         self.veichle : Veichle = veichle
         self.current_place : Place = place
         self.current_rating : float = 0
+        self.status = 0 
+        self.request : Order = None
+        self.orders = Dict(Order)
 
     def add_rating(self, rating):
         self.current_rating = (self.current_place + rating) / 2
@@ -17,4 +20,10 @@ class Driver:
 
     def set_veichle(self, veichle):
         self.veichle = veichle
+
+    def next_status(self, status):
+        self.status = self.status + 1
+        if self.status >= 2:
+            self.status = 2
+
     

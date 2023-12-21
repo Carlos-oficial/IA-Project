@@ -10,8 +10,7 @@ class Order:
         self.products = dict({})
         self.rating = 0
         self.weight = 0
-        self.todeliver = False
-        self.delivered = False
+        set.status = [False, False]
 
     def add_product(self, product : Product):
         if not self.todeliver:
@@ -22,7 +21,7 @@ class Order:
         if not self.delivered:
             self.rating = rating
 
-    def askDelivery(self):
+    def ask_delivery(self):
         self.done = True
 
     def deliver(self):
