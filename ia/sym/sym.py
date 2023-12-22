@@ -1,3 +1,5 @@
+import time
+
 from ia.map.map import Map
 
 
@@ -20,5 +22,8 @@ class Simulation:
         self.drivers = dict({})
         self.orders = dict({})
 
-    def run():
-        self.tui
+    def start(self):
+        pass
+
+    def tick(self):
+        self.state.tick()

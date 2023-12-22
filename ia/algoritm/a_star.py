@@ -1,8 +1,9 @@
 import heapq
 from queue import PriorityQueue
 from typing import List
-from ia.map.place import Place
+
 from ia.map.map import Map
+from ia.map.place import Place
 
 # from ia.drivers.veichle import Veichle
 

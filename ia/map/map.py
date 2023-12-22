@@ -1,6 +1,6 @@
-from ctypes import Union
 import json
-from typing import Dict, Set, List
+from ctypes import Union
+from typing import Dict, List, Set
 
 import networkx as nx
 

@@ -1,4 +1,5 @@
 import uuid
+
 from ia.map.place import Place
 
 

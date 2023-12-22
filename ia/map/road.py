@@ -1,4 +1,5 @@
 import random
+
 from ia.map.place import Place
 from ia.map.weather import Weather
 

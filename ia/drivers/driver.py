@@ -1,7 +1,7 @@
+from typing import Dict
+
 from ia.drivers.veichle import Veichle
 from ia.map.place import Place
-
-from typing import Dict
 
 
 class Driver:

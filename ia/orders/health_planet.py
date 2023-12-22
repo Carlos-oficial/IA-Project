@@ -1,9 +1,11 @@
-from ia.map.place import Place
-from ia.map.map import Map
-from ia.orders.product import Product
 from typing import Dict, Set
-from typing_extensions import TypedDict
+
 import networkx as nx
+from typing_extensions import TypedDict
+
+from ia.map.map import Map
+from ia.map.place import Place
+from ia.orders.product import Product
 
 
 class HealthPlanet:
