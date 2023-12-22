@@ -39,33 +39,39 @@ class MapGenerator:
         self.network_labels = None
 
         self.state = State()
+        self.setup_ui()
         # STATe
 
+    def setup_ui(self):
         # Entry for location
-        self.location_entry = tk.Entry(master)
-        self.location_entry.grid(row=0)
+        self.location_entry = tk.Entry(self.master)
+        self.location_entry.focus()
+        self.location_entry.grid(row=0, column=0)
+        self.location_entry.bind("<Return>", lambda event: self.retrieve_map())
 
         # Button to retrieve map
         self.retrieve_button = tk.Button(
-            master, text="Retrieve Map", command=self.retrieve_map
+            self.master, text="Retrieve Map", command=self.retrieve_map
         )
-        self.retrieve_button.grid(row=1)
+        self.retrieve_button.grid(row=0, column=1)
 
         self.points_button = tk.Button(
-            master, text="Randomize points", command=self.select_nodes
+            self.master, text="Randomize points", command=self.select_nodes
         )
         self.points_button.grid(row=2, column=0)
 
         self.name_nodes_button = tk.Button(
-            master, text="Name points", command=self.name_nodes
+            self.master, text="Name points", command=self.name_nodes
         )
         self.name_nodes_button.grid(row=2, column=1)
 
-        self.save_button = tk.Button(master, text="Save", command=self.save)
+        self.save_button = tk.Button(self.master, text="Save", command=self.save)
         self.save_button.grid(row=3)
 
         self.result_label = tk.Label(self.master, text="")
         self.result_label.grid(padx=20, pady=20)
+
+        self.master.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def retrieve_map(self):
         try:
@@ -235,7 +241,13 @@ class MapGenerator:
             self.canvas.figure = self.fig
             self.canvas.draw()
 
+    def on_close(self):
+        # Perform any cleanup or additional actions before closing the app
+        print("Closing the app.")
+        self.master.destroy()
+
     def run():
         root = tk.Tk()
         app = MapGenerator(root)
         root.mainloop()
+        return app.state

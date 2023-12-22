@@ -1,3 +1,4 @@
-from ia.ui.app import MapGenerator
+from ia.ui.map_generator import MapGenerator
 
-MapGenerator.run()
+s = MapGenerator.run()
+print(s)
