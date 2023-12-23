@@ -152,7 +152,6 @@
       <data key="d4">41.5620548</data>
       <data key="d5">-8.3909029</data>
       <data key="d6">3</data>
-      <data key="d8">A</data>
     </node>
     <node id="512536224">
       <data key="d4">41.5620293</data>
@@ -218,7 +217,6 @@
       <data key="d4">41.5655505</data>
       <data key="d5">-8.3891351</data>
       <data key="d6">1</data>
-      <data key="d8">B</data>
     </node>
     <node id="667884481">
       <data key="d4">41.565545</data>
@@ -234,7 +232,6 @@
       <data key="d4">41.5649223</data>
       <data key="d5">-8.3918473</data>
       <data key="d6">4</data>
-      <data key="d8">C</data>
     </node>
     <node id="669619259">
       <data key="d4">41.5637022</data>
@@ -270,6 +267,7 @@
       <data key="d4">41.5648713</data>
       <data key="d5">-8.3900022</data>
       <data key="d6">1</data>
+      <data key="d8">O</data>
     </node>
     <node id="698805816">
       <data key="d4">41.5648934</data>
@@ -413,7 +411,6 @@
       <data key="d4">41.5704693</data>
       <data key="d5">-8.3890852</data>
       <data key="d6">3</data>
-      <data key="d8">D</data>
     </node>
     <node id="1232769656">
       <data key="d4">41.5703182</data>
@@ -424,7 +421,6 @@
       <data key="d4">41.5694006</data>
       <data key="d5">-8.385428</data>
       <data key="d6">3</data>
-      <data key="d8">E</data>
     </node>
     <node id="1234594469">
       <data key="d4">41.5647257</data>
@@ -465,13 +461,11 @@
       <data key="d4">41.5688659</data>
       <data key="d5">-8.3841907</data>
       <data key="d6">3</data>
-      <data key="d8">F</data>
     </node>
     <node id="1234613545">
       <data key="d4">41.5682942</data>
       <data key="d5">-8.3796023</data>
       <data key="d6">3</data>
-      <data key="d8">G</data>
     </node>
     <node id="1250119255">
       <data key="d4">41.5718459</data>
@@ -532,6 +526,7 @@
       <data key="d4">41.5665033</data>
       <data key="d5">-8.3957435</data>
       <data key="d6">1</data>
+      <data key="d8">K</data>
     </node>
     <node id="1583945628">
       <data key="d4">41.5664264</data>
@@ -587,6 +582,7 @@
       <data key="d4">41.5671864</data>
       <data key="d5">-8.3857831</data>
       <data key="d6">1</data>
+      <data key="d8">Y</data>
     </node>
     <node id="1683160062">
       <data key="d4">41.5674216</data>
@@ -617,6 +613,7 @@
       <data key="d4">41.568903</data>
       <data key="d5">-8.3914758</data>
       <data key="d6">3</data>
+      <data key="d8">S</data>
     </node>
     <node id="1683160092">
       <data key="d4">41.5689776</data>
@@ -713,6 +710,7 @@
       <data key="d4">41.5708634</data>
       <data key="d5">-8.3844884</data>
       <data key="d6">3</data>
+      <data key="d8">W</data>
     </node>
     <node id="1683182832">
       <data key="d4">41.5714768</data>
@@ -763,6 +761,7 @@
       <data key="d4">41.5682414</data>
       <data key="d5">-8.3795685</data>
       <data key="d6">4</data>
+      <data key="d8">R</data>
     </node>
     <node id="1745756212">
       <data key="d4">41.5687673</data>
@@ -848,6 +847,7 @@
       <data key="d4">41.5708137</data>
       <data key="d5">-8.3790331</data>
       <data key="d6">3</data>
+      <data key="d8">D</data>
     </node>
     <node id="1745799353">
       <data key="d4">41.5696257</data>
@@ -878,6 +878,7 @@
       <data key="d4">41.5708296</data>
       <data key="d5">-8.3763228</data>
       <data key="d6">1</data>
+      <data key="d8">P</data>
     </node>
     <node id="1745799374">
       <data key="d4">41.5705937</data>
@@ -928,6 +929,7 @@
       <data key="d4">41.5735162</data>
       <data key="d5">-8.3789532</data>
       <data key="d6">3</data>
+      <data key="d8">F</data>
     </node>
     <node id="1745816347">
       <data key="d4">41.5728202</data>
@@ -1018,6 +1020,7 @@
       <data key="d4">41.5740502</data>
       <data key="d5">-8.3842841</data>
       <data key="d6">3</data>
+      <data key="d8">A</data>
     </node>
     <node id="2026249545">
       <data key="d4">41.5731597</data>
@@ -1259,7 +1262,6 @@
       <data key="d4">41.5720373</data>
       <data key="d5">-8.3764843</data>
       <data key="d6">3</data>
-      <data key="d8">H</data>
     </node>
     <node id="6789481279">
       <data key="d4">41.5715554</data>
@@ -1285,7 +1287,6 @@
       <data key="d4">41.5653582</data>
       <data key="d5">-8.387621</data>
       <data key="d6">3</data>
-      <data key="d8">I</data>
     </node>
     <node id="9760091634">
       <data key="d4">41.5653012</data>
@@ -1316,7 +1317,6 @@
       <data key="d4">41.5634558</data>
       <data key="d5">-8.3880266</data>
       <data key="d6">3</data>
-      <data key="d8">J</data>
     </node>
     <node id="10250136169">
       <data key="d4">41.5632854</data>
@@ -3003,7 +3003,7 @@
       <data key="d9">[109126896, 109126895]</data>
       <data key="d14">False</data>
       <data key="d11">EM 590</data>
-      <data key="d12">['Rua da Igreja Velha', 'Rua Igreja Velha']</data>
+      <data key="d12">['Rua Igreja Velha', 'Rua da Igreja Velha']</data>
       <data key="d13">tertiary</data>
       <data key="d15">True</data>
       <data key="d16">254.699</data>
@@ -3907,7 +3907,7 @@
       <data key="d9">[109126896, 109126895]</data>
       <data key="d14">False</data>
       <data key="d11">EM 590</data>
-      <data key="d12">['Rua da Igreja Velha', 'Rua Igreja Velha']</data>
+      <data key="d12">['Rua Igreja Velha', 'Rua da Igreja Velha']</data>
       <data key="d13">tertiary</data>
       <data key="d15">False</data>
       <data key="d16">254.699</data>
@@ -4394,7 +4394,7 @@
     <edge source="1683182839" target="2026249415" id="0">
       <data key="d9">[155994875, 714380431]</data>
       <data key="d12">Rua de Breias</data>
-      <data key="d13">['residential', 'unclassified']</data>
+      <data key="d13">['unclassified', 'residential']</data>
       <data key="d14">False</data>
       <data key="d15">False</data>
       <data key="d16">359.72</data>
@@ -5466,7 +5466,7 @@
     <edge source="2026249415" target="1683182839" id="0">
       <data key="d9">[155994875, 714380431]</data>
       <data key="d12">Rua de Breias</data>
-      <data key="d13">['residential', 'unclassified']</data>
+      <data key="d13">['unclassified', 'residential']</data>
       <data key="d14">False</data>
       <data key="d15">True</data>
       <data key="d16">359.72</data>
@@ -5507,7 +5507,7 @@
     </edge>
     <edge source="2062528751" target="2062528846" id="0">
       <data key="d9">[196331136, 726989592]</data>
-      <data key="d12">['Rua de Pousada', 'Rua de Novaínho']</data>
+      <data key="d12">['Rua de Novaínho', 'Rua de Pousada']</data>
       <data key="d13">residential</data>
       <data key="d14">False</data>
       <data key="d15">False</data>
@@ -5558,7 +5558,7 @@
     </edge>
     <edge source="2062528846" target="2062528751" id="0">
       <data key="d9">[726989592, 196331136]</data>
-      <data key="d12">['Rua de Pousada', 'Rua de Novaínho']</data>
+      <data key="d12">['Rua de Novaínho', 'Rua de Pousada']</data>
       <data key="d13">residential</data>
       <data key="d14">False</data>
       <data key="d15">True</data>
@@ -6621,7 +6621,7 @@
       <data key="d15">False</data>
       <data key="d16">5.753</data>
     </edge>
-    <data key="d0">2023-12-22 03:15:06</data>
+    <data key="d0">2023-12-23 19:07:32</data>
     <data key="d1">OSMnx 1.8.0</data>
     <data key="d2">epsg:4326</data>
     <data key="d3">True</data>

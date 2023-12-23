@@ -7,6 +7,8 @@ import networkx as nx
 from ia.map.place import Place
 from ia.map.road import Road
 
+from ia.ui.map_generator import MapGenerator, MapGeneratorState
+
 
 class Map:
     """
@@ -22,9 +24,34 @@ class Map:
     def __init__(self) -> None:
         self.places: Dict[str, Place] = dict({})
         self.roads: Set[Road] = set({})
+        self.geo_features = None
+        self.location = None
+        self.networkx_graph = None
 
     def add_road(self, place1: Place, place2: Place, length):
         self.roads.add(Road(place1, place2, length))
+
+    @staticmethod
+    def from_map_gen_state(state: MapGeneratorState):
+        map = Map()
+        map.location = state.location
+        # Clear existing places and roads
+        map.geo_features = state.gdf
+        map.networkx_graph = state.G
+
+        # Add nodes (places) to the map
+        for node, data in state.G.nodes(data=True):
+            place = Place(node, x=data["x"], y=data["y"])
+            map.places[node] = place
+
+        # Add edges (roads) to the map
+        for edge in map.networkx_graph.edges(data=True):
+            place1 = map.places[edge[0]]
+            place2 = map.places[edge[1]]
+            length = edge[2]["length"]
+            map.add_road(place1, place2, length)
+
+        return map
 
     def get_neighbours(self, place):
         return list(filter(lambda r: r.get_source() == place, self.roads))
@@ -50,7 +77,7 @@ class Map:
 
     # Converte um json para Map
     @staticmethod
-    def load(file_path: str) -> "Map":
+    def load_from_json(file_path: str) -> "Map":
         with open(file_path, "r") as file:
             map_data = json.load(file)
 
@@ -74,15 +101,12 @@ class Map:
 
         return my_map
 
-    # NETWORKX
-    #
-    #
-    #
-
-    def networkx_graph(self):
+    def get_networkx_graph(self):
         """
         converte um mapa para um grafo da biblioteca networkx
         """
+        if self.G:
+            return self.G
         G = nx.Graph()
         for node in self.places.keys():
             G.add_node(node)
@@ -114,5 +138,3 @@ class Map:
             target=dest,
             weight=weight_function,
         )
-
-    # end def

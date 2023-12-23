@@ -13,7 +13,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from PIL import Image, ImageTk
 
 
-class State:
+class MapGeneratorState:
     def __init__(self):
         self.G = None
         self.gdf = None
@@ -37,8 +37,8 @@ class MapGenerator:
         self.ax = None
         self.fig = None
         self.network_labels = None
-
-        self.state = State()
+        self.show_streets = False
+        self.state = MapGeneratorState()
         self.setup_ui()
         # STATe
 
@@ -54,6 +54,11 @@ class MapGenerator:
             self.master, text="Retrieve Map", command=self.retrieve_map
         )
         self.retrieve_button.grid(row=0, column=1)
+
+        toggle_button = tk.Button(
+            self.master, text="Toggle street names", command=self.toggle_streets
+        )
+        toggle_button.grid(row=0, column=2)
 
         self.points_button = tk.Button(
             self.master, text="Randomize points", command=self.select_nodes
@@ -73,6 +78,10 @@ class MapGenerator:
 
         self.master.protocol("WM_DELETE_WINDOW", self.on_close)
 
+    def toggle_streets(self):
+        self.show_streets = not self.show_streets
+        self.draw()
+
     def retrieve_map(self):
         try:
             self.state.selected_nodes = dict({})
@@ -82,7 +91,7 @@ class MapGenerator:
             g = ox.graph_from_place(self.state.location, network_type="drive")
             self.state.G = g  # ox.get_undirected(g)
             self.state.gdf = ox.features_from_place(
-                self.state.location, {"building": True}
+                self.state.location, {"building": True, "highway": True}
             )
 
             # Plot the graph
@@ -92,7 +101,7 @@ class MapGenerator:
         except Exception as e:
             print(e)
             error_label = ttk.Label(self.master, text=e)
-            error_label.grid(row=0, column=0)
+            error_label.grid(row=10, column=0, sticky="w")
 
     def select_nodes(self):
         try:
@@ -189,62 +198,81 @@ class MapGenerator:
         submit_button.grid(pady=20)
 
     def draw(self):
-        self.fig, self.ax = ox.plot_graph(
-            self.state.G,
-            node_size=0,
-            edge_color="w",
-            edge_linewidth=0.7,
-            show=False,
-        )
-        # or plot street network and the geospatial features' footprints together
-        self.fig, self.ax = ox.plot_graph(
-            self.state.G,
-            ax=self.ax,
-            node_size=0,
-            edge_color="w",
-            edge_linewidth=0.7,
-            show=False,
-        )
-        self.fig, self.ax = ox.plot_footprints(
-            self.state.gdf, ax=self.ax, alpha=0.4, show=False, color="cyan"
-        )
+        if self.state.G is not None and self.state.gdf is not None:
+            self.fig, self.ax = ox.plot_graph(
+                self.state.G,
+                node_size=0,
+                edge_color="w",
+                edge_linewidth=0.7,
+                show=False,
+            )
+            # or plot street network and the geospatial features' footprints together
+            self.fig, self.ax = ox.plot_graph(
+                self.state.G,
+                ax=self.ax,
+                node_size=0,
+                edge_color="w",
+                edge_linewidth=0.7,
+                show=False,
+            )
+            self.fig, self.ax = ox.plot_footprints(
+                self.state.gdf, ax=self.ax, alpha=0.4, show=False, color="cyan"
+            )
 
-        self.update_node_names()
+            self.update_node_names()
 
-        node_labels = nx.get_node_attributes(self.state.G, "pickup")
-        labels = {
-            key: node_labels[key]
-            for key in self.state.selected_nodes.keys()
-            if key in node_labels
-        }
+            node_labels = nx.get_node_attributes(self.state.G, "pickup")
+            labels = {
+                key: node_labels[key]
+                for key in self.state.selected_nodes.keys()
+                if key in node_labels
+            }
 
-        pos = {
-            node: (data["x"], data["y"]) for node, data in self.state.G.nodes(data=True)
-        }
+            pos = {
+                node: (data["x"], data["y"])
+                for node, data in self.state.G.nodes(data=True)
+            }
 
-        self.network_lables = nx.draw_networkx_labels(
-            self.state.G,
-            pos,
-            labels=labels,
-            font_color="white",
-            font_size=10,
-            font_weight="bold",
-            horizontalalignment="right",
-            verticalalignment="bottom",
-        )
+            self.network_lables = nx.draw_networkx_labels(
+                self.state.G,
+                pos,
+                labels=labels,
+                font_color="white",
+                font_size=10,
+                font_weight="bold",
+                horizontalalignment="right",
+                verticalalignment="bottom",
+            )
 
-        if self.canvas is None:
-            self.canvas = FigureCanvasTkAgg(self.fig, master=self.master)
-            self.canvas.get_tk_widget().grid()
-        else:
-            # Update the existing canvas with the new figure
-            self.canvas.figure = self.fig
-            self.canvas.draw()
+            if self.show_streets:
+                # Annotate streets with their names
+                for _, row in self.state.gdf.iterrows():
+                    # print(row['name'])
+                    not_allowed = {"nan"}
+                    if str(row["name"]) not in not_allowed:
+                        not_allowed.add(row["name"])
+                        self.ax.text(
+                            row["geometry"].centroid.x,
+                            row["geometry"].centroid.y,
+                            row["name"],
+                            color="red",
+                            fontsize=8,
+                        )
+
+            if self.canvas is None:
+                self.canvas = FigureCanvasTkAgg(self.fig, master=self.master)
+                self.canvas.get_tk_widget().grid()
+            else:
+                # Update the existing canvas with the new figure
+                self.canvas.figure = self.fig
+                self.canvas.draw()
 
     def on_close(self):
         # Perform any cleanup or additional actions before closing the app
-        print("Closing the app.")
+        print("Closing the app...")
         self.master.destroy()
+        self.master.quit()
+        print("Closed the app.")
 
     def run():
         root = tk.Tk()
