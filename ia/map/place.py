@@ -5,8 +5,7 @@ from ia.map.weather import Weather
 class Place:
     def __init__(self, name: str):
         self.name = name
-        self.storage: Dict[str, int] = {}
-        # random weather
+        #random weather
         self.weather: Weather = Weather.randomize()
 
     def __hash__(self):
