@@ -38,8 +38,3 @@ class Order:
 
         if self.status >= 2:
             self.status = 2
-
-
-            
-
-        
