@@ -3,7 +3,8 @@ from queue import PriorityQueue
 from typing import List
 from ia.map.place import Place
 from ia.map.map import Map
-#from ia.drivers.veichle import Veichle
+
+# from ia.drivers.veichle import Veichle
 
 
 def a_star_search(graph: Map, start: Place, end: Place) -> List[Place]:
@@ -44,11 +45,8 @@ def a_star_search(graph: Map, start: Place, end: Place) -> List[Place]:
                     costs[neighbor_node] = new_cost
                     heapq.heappush(open_set, (total_cost, neighbor_node))
                     parents[neighbor_node] = current_node
-                    print(f"Adding {neighbor_node.name} to queue with cost {new_cost}, total cost {total_cost}")
+                    print(
+                        f"Adding {neighbor_node.name} to queue with cost {new_cost}, total cost {total_cost}"
+                    )
 
     raise Exception("No path found")
-
-
-
-
-        

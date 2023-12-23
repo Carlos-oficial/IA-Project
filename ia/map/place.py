@@ -13,6 +13,9 @@ class Place:
 
     def __eq__(self, other):
         return self.name == other.name
-    
+
+    # def __str__(self):
+    #    return self.name
+
     def get_weather(self) -> Weather:
         return self.weather

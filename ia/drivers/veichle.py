@@ -6,7 +6,7 @@ class Veichle:
         self.avg_velocity = avg_velocity
         self.weight_cap = weight_cap
         self.vel_decrement = vel_decrement
-        self.cargo = {}
+        self.cargo: Dict[Product, int] = dict({})  # Mapeia produtos e quantidades
         self.emissions = emissions
 
     def cargo_weight(self):

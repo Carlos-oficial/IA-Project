@@ -1,6 +1,7 @@
 import uuid
 from ia.map.place import Place
 
+
 class Order:
 
     def __init__(self, time, place : Place):

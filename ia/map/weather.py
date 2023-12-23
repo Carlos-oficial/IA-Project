@@ -1,5 +1,6 @@
-from enum import  Enum
+from enum import Enum
 import random
+
 
 class Weather(Enum):
     Sunny = 1
@@ -10,4 +11,3 @@ class Weather(Enum):
     @staticmethod
     def randomize():
         return random.choice(list(Weather))
-
