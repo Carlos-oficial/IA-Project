@@ -12,9 +12,10 @@ mapa = Map.load("map.json")
 start_place = mapa.get_place("Viana do Castelo")  
 end_place = mapa.get_place("Lisboa")  
 
-#path = a_star_search(mapa,start_place, end_place)
+path_a = a_star_search(mapa,start_place, end_place)
 path = greedy_search(mapa,start_place, end_place)
-print("Path:", [place.name for place in path])
+print("Path A*:", [place.name for place in path_a])
+print("Path Greedy:", [place.name for place in path])
 
 # Draw the graph
 G = mapa.networkx_graph()
