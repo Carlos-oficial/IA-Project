@@ -18,6 +18,6 @@ class Order:
     def set_rating(self, rating):
         self.rating = rating
 
-            
-
+    def get_place(self):
+        return self.place
         

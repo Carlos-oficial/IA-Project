@@ -17,4 +17,7 @@ class Driver:
 
     def set_veichle(self, veichle):
         self.veichle = veichle
-    
+
+    def get_place(self) -> Place:
+        return self.current_place
+ 
