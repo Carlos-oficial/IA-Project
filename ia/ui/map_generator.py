@@ -14,6 +14,8 @@ from PIL import Image, ImageTk
 
 
 class MapGeneratorState:
+    _id = 0
+
     def __init__(self):
         self.G = None
         self.gdf = None
@@ -26,6 +28,31 @@ class MapGeneratorState:
         with open(fpath + "/data.json", "w") as json_file:
             data = {"location": self.location}
             json.dump(data, json_file, indent=4)
+
+    @staticmethod
+    def new_unique_name():
+        def number_to_letters(n):
+            result = ""
+            while n >= 0:
+                result = chr(n % 26 + 65) + result
+                n = n // 26 - 1
+            return result
+
+        i = MapGeneratorState._id
+        MapGeneratorState._id += 1
+        return number_to_letters(i)
+
+    @staticmethod
+    def retrieve_map(place_name):
+        # Get location from the entry
+
+        g = ox.graph_from_place(place_name, network_type="drive")
+        # self.state.gdf = ox.features_from_place(
+        #     self.state.location, {"building": True, "highway": True}
+        # )
+        for node, data in g.nodes(data=True):
+            data["name"] = MapGeneratorState.new_unique_name()
+        return g
 
 
 class MapGenerator:
@@ -93,6 +120,8 @@ class MapGenerator:
             self.state.gdf = ox.features_from_place(
                 self.state.location, {"building": True, "highway": True}
             )
+            for node, data in self.state.G.nodes(data=True):
+                data["name"] = MapGeneratorState.new_unique_name()
 
             # Plot the graph
 
@@ -118,7 +147,10 @@ class MapGenerator:
 
             letters = list(string.ascii_uppercase)
             self.state.selected_nodes = {
-                k: take1(letters) for k in random.choices(list(self.state.G), k=10)
+                k: v["name"]
+                for k, v in random.choices(
+                    list(dict(self.state.G.nodes(data=True)).items()), k=10
+                )
             }
 
             self.master.update_idletasks()
