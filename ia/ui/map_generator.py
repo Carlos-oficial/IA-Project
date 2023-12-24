@@ -9,6 +9,7 @@ from tkinter import ttk
 import geopandas as gpd
 import networkx as nx
 import osmnx as ox
+from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from PIL import Image, ImageTk
 
@@ -230,6 +231,8 @@ class MapGenerator:
         submit_button.grid(pady=20)
 
     def draw(self):
+        # plt.cla()
+        # plt.clf()
         if self.state.G is not None and self.state.gdf is not None:
             self.fig, self.ax = ox.plot_graph(
                 self.state.G,
@@ -302,6 +305,8 @@ class MapGenerator:
     def on_close(self):
         # Perform any cleanup or additional actions before closing the app
         print("Closing the app...")
+        # plt.cla()
+        # plt.clf()
         self.master.destroy()
         self.master.quit()
         print("Closed the app.")
