@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 from ia.algoritm.a_star import a_star_search
+from ia.algoritm.greedy import greedy_search
 
 from ia.map.map import Map
 #from ia.orders.product import Product
@@ -9,9 +10,10 @@ from ia.map.map import Map
 mapa = Map.load("map.json")
 
 start_place = mapa.get_place("Viana do Castelo")  
-end_place = mapa.get_place("Aveiro")  
+end_place = mapa.get_place("Lisboa")  
 
-path = a_star_search(mapa,start_place, end_place)
+#path = a_star_search(mapa,start_place, end_place)
+path = greedy_search(mapa,start_place, end_place)
 print("Path:", [place.name for place in path])
 
 # Draw the graph
