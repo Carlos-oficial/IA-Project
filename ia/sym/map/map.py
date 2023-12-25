@@ -138,7 +138,7 @@ class Map:
 
         return map
 
-    def plot_map(self, show_edge_lables=False, route=None):
+    def plot(self, show_edge_lables=False, route=None):
         fig, ax = ox.plot_graph(
             self.graph,
             node_size=0,

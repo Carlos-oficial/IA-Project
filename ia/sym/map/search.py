@@ -7,18 +7,20 @@ import osmnx as ox
 from geopy.distance import geodesic
 
 
-class SearchResult:
+class SearchResultOnMap:
     def __init__(
         self,
         path: List[int],
         map: Map = None,
         search_tree: Dict[int, int] = dict(),
         explored=set(),
+        nodes_to_highlight=set(),
     ):
         self.map: Map = map
         self.path = path
         self.search_tree: Dict[int, int] = search_tree
         self.explored: Set[int] = explored
+        self.nodes_to_highlight = nodes_to_highlight
 
     def __repr__(self):
         return f"SearchResult(path={self.path}\n search_tree={self.search_tree}\n explored={self.explored})"
@@ -37,9 +39,7 @@ class SearchResult:
             "r" if node in self.path else "g" if node in self.explored else "w"
             for node in self.map.graph.nodes
         ]
-        route_edges = set(zip(self.path[1:], self.path)).union(
-            set(zip(self.path, self.path[1:]))
-        )
+        route_edges = set(zip(self.path[1:], self.path))
         tree_edges = self.get_tree_edges()
 
         edge_colors = []
@@ -53,36 +53,55 @@ class SearchResult:
 
         fig, ax = ox.plot_graph(
             self.map.graph,
+            node_size=0,
             node_color=nc,
-            node_size=5,
             edge_color=edge_colors,
+            edge_alpha=0.6,
             bgcolor="k",
+            show=False,
         )
 
-        fig = ox.plot_graph_route(
+        nx.draw_networkx_labels(
             self.map.graph,
-            self.path,
+            pos=self.map._render_positions,
+            labels=self.map._node_names,
+            font_color="w",
+            font_size=10,
+            font_weight="light",
+            horizontalalignment="right",
+            verticalalignment="bottom",
             ax=ax,
-            route_linewidth=6,
-            route_color=color,
-            node_size=10,
-            bgcolor="k",
+        )
+
+        for node, (x, y) in [
+            (node, (x, y))
+            for (node, (x, y)) in self.map._render_positions.items()
+            if node in self.nodes_to_highlight
+        ]:
+            plt.scatter(x, y, color="blue", marker="o", s=30)
+
+        start = self.path[0]
+        end = self.path[-1]
+        ax.set_title(
+            f"searched from {self.map._node_names[start]} to {self.map._node_names[end]}"
         )
 
         plt.show()
 
 
 class Search:
-    def __init__(self, map: Map):
-        self.map = map
-
-    def run() -> SearchResult:
+    def run() -> SearchResultOnMap:
         pass
 
 
 class ClassicalSearch(Search):
     def __init__(self, map: Map):
-        super().__init__(map)
+        self.map = map
+        self.explored: Set[int] = set()
+        self.search_tree: Dict[int, int] = dict()
+        self.current_node: int = None
+
+    def reset(self):
         self.explored: Set[int] = set()
         self.search_tree: Dict[int, int] = dict()
         self.current_node: int = None
@@ -93,7 +112,9 @@ class UninformedSearch(ClassicalSearch):
         super().__init__(map)
         self.pop_index: int = pop_index
 
-    def run(self, src, dest):
+    def run(self, src, dest, reset=False):
+        if reset:
+            self.reset()
         stack = [(src, [src])]  # Stack containing (current_node, path_so_far)
         self.explored = set()
         self.search_tree = dict()
@@ -101,7 +122,7 @@ class UninformedSearch(ClassicalSearch):
             self.current_node, path = stack.pop(self.pop_index)
 
             if self.current_node == dest:
-                return SearchResult(
+                return SearchResultOnMap(
                     map=self.map,
                     path=path,
                     search_tree=self.search_tree,
@@ -119,7 +140,7 @@ class UninformedSearch(ClassicalSearch):
                     self.search_tree[neighbor_node] = self.current_node
 
         # If no path is found
-        return SearchResult(
+        return SearchResultOnMap(
             map=self.map,
             path=None,
             search_tree=self.search_tree,
@@ -144,7 +165,14 @@ class BestFirstSearch(ClassicalSearch):
         self.f = f
         self.costs = dict()
 
-    def run(self, src, dest):
+    def reset(self):
+        super().reset()
+        self.costs = dict()
+
+    def run(self, src, dest, reset=False):
+        if reset:
+            self.reset()
+
         open_set = [(0, src)]
 
         heapq.heappush(open_set, (0, src))
@@ -159,7 +187,7 @@ class BestFirstSearch(ClassicalSearch):
                 while current_node is not None:
                     path.append(current_node)
                     current_node = self.search_tree[current_node]
-                return SearchResult(
+                return SearchResultOnMap(
                     list(reversed(path)),
                     map=self.map,
                     explored=self.explored,
@@ -185,7 +213,7 @@ class BestFirstSearch(ClassicalSearch):
                         self.costs[neighbor_node] = new_cost
                         heapq.heappush(open_set, (total_cost, neighbor_node))
                         self.search_tree[neighbor_node] = current_node
-        return SearchResult(
+        return SearchResultOnMap(
             map=self.map,
             path=[],
             search_tree=self.search_tree,
@@ -219,11 +247,13 @@ class UniformedCostSearch(BestFirstSearch):
 
 class TourSearch(Search):
     def __init__(self, map, meta_heuristic, alg: ClassicalSearch):
-        super().__init__(map)
+        self.map = map
         self.meta_heuristic = meta_heuristic
         self.alg = alg
+        self.nodes_in_tour = list()
 
     def run(self, src, *nodes):
+        self.nodes_in_tour = [src] + list(nodes)
         missing = list(nodes)
         curr_node = src
         route = [src]
@@ -232,8 +262,16 @@ class TourSearch(Search):
                 key=lambda candidate: self.meta_heuristic(curr_node, candidate)
             )
             next = missing.pop(0)
-            route += self.alg.run(curr_node, next).path[1:]
+            r = self.alg.run(curr_node, next)
+            self.alg.reset()
+            route += r.path[1:]
             curr_node = next
 
-        route += self.alg.run(curr_node, src).path[1:]
-        return SearchResult(route, map=self.map)
+        r = self.alg.run(curr_node, src)
+
+        route += r.path[1:]
+        return SearchResultOnMap(
+            route,
+            map=self.map,
+            nodes_to_highlight={node for node in self.nodes_in_tour},
+        )

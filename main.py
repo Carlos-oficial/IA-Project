@@ -10,17 +10,17 @@ from ia.ui.map_generator import MapGenerator, MapGeneratorState
 
 map = Map("Gualtar, PT", "file")
 map.fetch_map()
-map.plot_map()
+# map.plot(    )
 
-# s = map.get_node_by_name("AA")
-# n1 = map.get_node_by_name("BA")
-# n2 = map.get_node_by_name("CA")
-# n3 = map.get_node_by_name("GA")
+s = map.get_node_by_name("AA")
+n1 = map.get_node_by_name("GG")
+n2 = map.get_node_by_name("AJ")
+n3 = map.get_node_by_name("GA")
 
-# alg = GreedySearch(map, map.distance)
-# route_alg = TourSearch(map,map.distance,alg)
-# res = route_alg.run(s, n1,n2,n3)
-# res.plot()
+alg = AStar(map, map.distance)
+route_alg = TourSearch(map, map.distance, alg)
+res = route_alg.run(s, n1, n2, n3)
+res.plot()
 
 # map.test_distances()
 if False:
