@@ -1,8 +1,8 @@
 from typing import Dict
 
 from ia.drivers.veichle import Veichle
-from ia.map.place import Place
 from ia.orders.orders import Order
+from ia.sym.map.place import Place
 
 
 class Driver:

@@ -18,12 +18,14 @@ class MapGeneratorState:
     _id = 0
 
     def __init__(self):
-        self.G = None
-        self.gdf = None
+        self.G: nx.MultiDiGraph = None
+        self.gdf: gpd.GeoDataFrame = None
         self.selected_nodes = dict({})
         self.location = ""
+        self.path = ""
 
     def save_to_file(self, fpath):
+        self.path = fpath
         os.mkdir(fpath)
         ox.save_graphml(self.G, filepath=fpath + "/osm_graph.graphml")
         with open(fpath + "/data.json", "w") as json_file:

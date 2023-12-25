@@ -1,6 +1,6 @@
 import uuid
 
-from ia.map.place import Place
+from ia.sym.map.place import Place
 
 
 class Order:

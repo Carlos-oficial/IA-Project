@@ -4,25 +4,32 @@ import osmnx as ox
 from ia.sym.map.map import Map
 from ia.ui.map_generator import MapGenerator, MapGeneratorState
 
-s = MapGenerator.run()
-map = Map.from_map_gen_state(s)
-# g = MapGeneratorState.retrieve_map("Gualtar, PT")
-# map = Map.from_ox_graph(g)
+# s = MapGenerator.run()
+# map = Map.from_map_gen_state(s)
 
-print(map.pickup_points)
-from ia.algoritm.a_star import a_star_search
+map = Map("Gualtar, PT", "file")
+map.fetch_map()
 
-src = input("from?")
-dest = input("to?")
-if src in map.pickup_points.keys():
-    source = map.pickup_points[src]
-if dest in map.pickup_points.keys():
-    destination = map.pickup_points[dest]
+map.test_distances()
+if False:
+    s = map.get_node_by_name("AA")
+    d = map.get_node_by_name("GA")
+    while True:
+        alg = input("algoritmo: ")
+        if alg == "greedy":
+            res = map.greedy_search(
+                s,
+                d,
+            )
+        elif alg == "A*":
+            res = map.a_star_search(s, d)
+        elif alg == "custo uniforme":
+            res = map.uniform_cost_search(s, d)
+        elif alg == "DFS":
+            res = map.uninformed_search(s, d, index=-1)
+        elif alg == "BFS":
+            res = map.uninformed_search(s, d, index=0)
 
-path = a_star_search(map, map.places[source], map.places[destination])
-path = [elem.id for elem in path]
+        map.plot_route(res["route"], explored=res["explored"], parents=res["parents"])
 
-fig, ax = ox.plot_graph_route(
-    map.networkx_graph, path, route_linewidth=6, node_size=0, bgcolor="k"
-)
-plt.show()
+    print(res["route"], len(res["explored"]))

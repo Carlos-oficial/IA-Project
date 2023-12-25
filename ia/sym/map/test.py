@@ -1,5 +1,5 @@
-import osmnx as ox
 import networkx as nx
+import osmnx as ox
 from geopy.distance import geodesic
 
 

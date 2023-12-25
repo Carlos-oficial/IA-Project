@@ -1,7 +1,7 @@
 import random
 
-from ia.map.place import Place
-from ia.map.weather import Weather
+from ia.sym.map.place import Place
+from ia.sym.map.weather import Weather
 
 
 class Road:
