@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import osmnx as ox
 
-from ia.map.map import Map
+from ia.sym.map.map import Map
 from ia.ui.map_generator import MapGenerator, MapGeneratorState
 
 s = MapGenerator.run()
