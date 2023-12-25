@@ -292,8 +292,9 @@ class Map:
 
     @staticmethod
     def get_tree_edges(parents):
+        if parents is None:
+            return set()
         tree_edges = set()
-
         for child, parent in parents.items():
             if parent is not None:
                 tree_edges.add((parent, child))

@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import osmnx as ox
 
 from ia.sym.map.map import Map
+from ia.sym.map.search import *
 from ia.ui.map_generator import MapGenerator, MapGeneratorState
 
 # s = MapGenerator.run()
@@ -10,11 +11,16 @@ from ia.ui.map_generator import MapGenerator, MapGeneratorState
 map = Map("Gualtar, PT", "file")
 map.fetch_map()
 
+s = map.get_node_by_name("AA")
+d = map.get_node_by_name("GA")
+dfs = DFS(map)
+res = dfs.run(s, d)
+print(res)
+map.plot_route(res.path, res.explored, parents=res.search_tree)
+
+
 # map.test_distances()
-if True:
-    print(map._node_names)
-    s = map.get_node_by_name("AA")
-    d = map.get_node_by_name("GA")
+if False:
     while True:
         alg = input("algoritmo: ")
         if alg == "greedy":
