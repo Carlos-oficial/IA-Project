@@ -13,11 +13,9 @@ map.fetch_map()
 
 s = map.get_node_by_name("AA")
 d = map.get_node_by_name("GA")
-dfs = DFS(map)
-res = dfs.run(s, d)
-print(res)
-map.plot_route(res.path, res.explored, parents=res.search_tree)
-
+alg = GreedySearch(map, map.distance)
+res = alg.run(s, d)
+res.plot()
 
 # map.test_distances()
 if False:

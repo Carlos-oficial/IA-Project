@@ -1,12 +1,24 @@
 from ia.sym.map.map import Map
 from typing import List, Dict, Set, Tuple
+import heapq
+import matplotlib.pyplot as plt
+import networkx as nx
+import osmnx as ox
+from geopy.distance import geodesic
 
 
 class SearchResult:
-    def __init__(self, path: List[int], search_tree: Dict[int, int]):
+    def __init__(
+        self,
+        path: List[int],
+        map: Map = None,
+        search_tree: Dict[int, int] = dict(),
+        explored=set(),
+    ):
+        self.map: Map = map
         self.path = path
         self.search_tree: Dict[int, int] = search_tree
-        self.explored: Set[int] = set()
+        self.explored: Set[int] = explored
 
     def __repr__(self):
         return f"SearchResult(path={self.path}\n search_tree={self.search_tree}\n explored={self.explored})"
@@ -19,6 +31,45 @@ class SearchResult:
                 tree_edges.add((parent, child))
 
         return tree_edges
+
+    def plot(self, color="red"):
+        nc = [
+            "r" if node in self.path else "g" if node in self.explored else "w"
+            for node in self.map.graph.nodes
+        ]
+        route_edges = set(zip(self.path[1:], self.path)).union(
+            set(zip(self.path, self.path[1:]))
+        )
+        tree_edges = self.get_tree_edges()
+
+        edge_colors = []
+        for x, y, _ in self.map.graph.edges:
+            if (x, y) in route_edges or (y, x) in route_edges:
+                edge_colors.append("red")
+            elif (x, y) in tree_edges or (y, x) in tree_edges:
+                edge_colors.append("green")
+            else:
+                edge_colors.append("w")
+
+        fig, ax = ox.plot_graph(
+            self.map.graph,
+            node_color=nc,
+            node_size=5,
+            edge_color=edge_colors,
+            bgcolor="k",
+        )
+
+        fig = ox.plot_graph_route(
+            self.map.graph,
+            self.path,
+            ax=ax,
+            route_linewidth=6,
+            route_color=color,
+            node_size=10,
+            bgcolor="k",
+        )
+
+        plt.show()
 
 
 class Search:
@@ -45,7 +96,12 @@ class UninformedSearch(Search):
             self.current_node, path = stack.pop(self.pop_index)
 
             if self.current_node == dest:
-                return SearchResult(path=path, search_tree=self.search_tree)
+                return SearchResult(
+                    map=self.map,
+                    path=path,
+                    search_tree=self.search_tree,
+                    explored=self.explored,
+                )
 
             if self.current_node in self.explored:
                 continue
@@ -58,7 +114,12 @@ class UninformedSearch(Search):
                     self.search_tree[neighbor_node] = self.current_node
 
         # If no path is found
-        return SearchResult(path=None, search_tree=self.search_tree)
+        return SearchResult(
+            map=self.map,
+            path=None,
+            search_tree=self.search_tree,
+            explored=self.explored,
+        )
 
 
 class DFS(UninformedSearch):
@@ -71,101 +132,81 @@ class BFS(UninformedSearch):
         super().__init__(map, 0)
 
 
-# def uninformed_search( src, dest, index=-1):
-#     stack = [(src, [src])]  # Stack containing (current_node, path_so_far)
-#     closed_set = set()
-#     parents = dict()
+class BestFirstSearch(Search):
+    def __init__(self, map, h, f):
+        super().__init__(map)
+        self.h = h
+        self.f = f
+        self.costs = dict()
 
-#     while stack:
-#         current_node, path = stack.pop(index)
+    def run(self, src, dest):
+        open_set = [(0, src)]
 
-#         if current_node == dest:
-#             return {"route": (path), "explored": closed_set, "parents": parents}
+        heapq.heappush(open_set, (0, src))
+        self.search_tree[src] = None
+        self.costs[src] = 0
 
-#         if current_node in closed_set:
-#             continue
+        while open_set:
+            current_cost, current_node = heapq.heappop(open_set)
 
-#         closed_set.add(current_node)
+            if current_node == dest:
+                path = []
+                while current_node is not None:
+                    path.append(current_node)
+                    current_node = self.search_tree[current_node]
+                return SearchResult(
+                    list(reversed(path)),
+                    map=self.map,
+                    explored=self.explored,
+                    search_tree=self.search_tree,
+                )
+            if current_node in self.explored:
+                continue
 
-#         for neighbor_node in self.neighbours(current_node):
-#             if neighbor_node not in closed_set:
-#                 stack.append((neighbor_node, path + [neighbor_node]))
-#                 parents[neighbor_node] = current_node
+            self.explored.add(current_node)
 
-#     # If no path is found
-#     return {"route": (None), "explored": closed_set, "parents": parents}
+            for neighbor_node in self.map.neighbours(current_node):
+                new_cost = self.costs[current_node] + self.map.edge_length(
+                    current_node, neighbor_node
+                )
+                estimated_cost = self.h(neighbor_node, dest)
+                total_cost = self.f(new_cost, estimated_cost)
 
-# def best_first_search(self, src, dest, f, h):
-#     start = src
-#     end = dest
-#     open_set = [(0, start)]
-#     closed_set = set()
-#     parents = dict()
-#     costs = dict()
+                if neighbor_node not in self.explored:
+                    if (
+                        neighbor_node not in self.costs
+                        or new_cost < self.costs[neighbor_node]
+                    ):
+                        self.costs[neighbor_node] = new_cost
+                        heapq.heappush(open_set, (total_cost, neighbor_node))
+                        self.search_tree[neighbor_node] = current_node
+        return SearchResult(
+            map=self.map,
+            path=None,
+            search_tree=self.search_tree,
+            explored=self.explored,
+        )
 
-#     heapq.heappush(open_set, (0, start))
-#     parents[start] = None
-#     costs[start] = 0
-#     checked = 0
 
-#     while open_set:
-#         checked += 1
-#         current_cost, current_node = heapq.heappop(open_set)
+class AStar(BestFirstSearch):
+    def __init__(self, map, h):
+        def f(cost, heuristic):
+            return cost + heuristic
 
-#         if current_node == end:
-#             path = []
-#             while current_node is not None:
-#                 path.append(current_node)
-#                 current_node = parents[current_node]
-#             return {
-#                 "route": list(reversed(path)),
-#                 "explored": closed_set,
-#                 "parents": parents,
-#             }
+        super().__init__(map, h, f)
 
-#         if current_node in closed_set:
-#             continue
 
-#         closed_set.add(current_node)
+class GreedySearch(BestFirstSearch):
+    def __init__(self, map, h):
+        def f(cost, heuristic):
+            return heuristic
 
-#         for neighbor_node in self.neighbours(current_node):
-#             new_cost = costs[current_node] + self.edge_length(
-#                 current_node, neighbor_node
-#             )
-#             estimated_cost = h(neighbor_node, dest)
-#             total_cost = f(new_cost, estimated_cost)
+        super().__init__(map, h, f)
 
-#             if neighbor_node not in closed_set:
-#                 if neighbor_node not in costs or new_cost < costs[neighbor_node]:
-#                     costs[neighbor_node] = new_cost
-#                     heapq.heappush(open_set, (total_cost, neighbor_node))
-#                     parents[neighbor_node] = current_node
 
-#     raise Exception("No path found")
+class UniformCostSearch(BestFirstSearch):
+    def __init__(self, map, h):
+        def f(cost, heuristic):
+            return cost
 
-# def a_star_search(self, src, dest):
-#     def f(cost, heuristic):
-#         return cost + heuristic
-
-#     def h(n1, n2):
-#         return self.distance(n1, n2)
-
-#     return self.best_first_search(src, dest, f, h)
-
-# def greedy_search(self, src, dest):
-#     def f(cost, heuristic):
-#         return heuristic
-
-#     def h(n1, n2):
-#         return self.distance(n1, n2)
-
-#     return self.best_first_search(src, dest, f, h)
-
-# def uniform_cost_search(self, src, dest):
-#     def f(cost, heuristic):
-#         return cost
-
-#     def h(n1, n2):
-#         return self.distance(n1, n2)
-
-#     return self.best_first_search(src, dest, f, h)
+        super().__init__(map, h, f)
