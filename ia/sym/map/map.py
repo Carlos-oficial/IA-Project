@@ -29,6 +29,7 @@ class Map:
         self.roads_mapped: dict = dict()
         # variaveis para cache
         self._node_positions: Dict[int, Tuple[float, float]] = dict()
+        self._render_positions: dict = dict()
         self._node_data: Dict[int, Dict[str, Any]] = dict()
         self._node_names: Dict[int, str] = dict()
         self._name_nodes: Dict[str, int] = dict()
@@ -116,6 +117,7 @@ class Map:
             self._node_data: Dict[node] = data
 
             self._node_positions[node] = self.referential_distance(data["y"], data["x"])
+            self._render_positions[node] = (data["x"], data["y"])
             name = data.get("name")
             if name is None:
                 name = node
@@ -145,25 +147,22 @@ class Map:
             bgcolor="k",
             show=False,
         )
-
-        labels = self.node_names()
-        node_color = ["b" for node in self.graph.nodes]
-
         nx.draw_networkx_labels(
             self.graph,
-            self._node_positions,
-            labels=labels,
+            pos=self._render_positions,
+            labels=self._node_names,
             font_color="w",
             font_size=10,
             font_weight="light",
             horizontalalignment="right",
             verticalalignment="bottom",
-            ax=ax,  # Specify the axis to draw on
+            ax=ax,
         )
 
-        nx.draw_networkx_nodes(
+        node_color = ["b" for node in self.graph.nodes]
+        fig, ax = nx.draw_networkx_nodes(
             self.graph,
-            self._node_positions,
+            self._render_positions,
             node_color=node_color,
             node_size=10,  # Adjust the size as needed
             ax=ax,
@@ -173,9 +172,9 @@ class Map:
                 (u, v): f"{data['length']:.2f} m"
                 for u, v, data in self.graph.edges(data=True)
             }
-            nx.draw_networkx_edge_labels(
+            fig, ax = nx.draw_networkx_edge_labels(
                 self.graph,
-                self._node_positions,
+                self._render_positions,
                 edge_labels=edge_labels,
                 font_color="w",
                 font_size=8,
@@ -184,7 +183,7 @@ class Map:
             )
 
         # Plot all nodes in blue
-        for node, (x, y) in self._node_positions.items():
+        for node, (x, y) in self._render_positions.items():
             plt.scatter(x, y, color="blue", marker="o", s=30)
         plt.show()
 

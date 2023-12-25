@@ -74,16 +74,21 @@ class SearchResult:
 
 class Search:
     def __init__(self, map: Map):
-        self.map: Map = map
-        self.explored: Set[int] = set()
-        self.search_tree: Dict[int, int] = dict()
-        self.current_node: int = None
+        self.map = map
 
     def run() -> SearchResult:
         pass
 
 
-class UninformedSearch(Search):
+class ClassicalSearch(Search):
+    def __init__(self, map: Map):
+        super().__init__(map)
+        self.explored: Set[int] = set()
+        self.search_tree: Dict[int, int] = dict()
+        self.current_node: int = None
+
+
+class UninformedSearch(ClassicalSearch):
     def __init__(self, map, pop_index):
         super().__init__(map)
         self.pop_index: int = pop_index
@@ -132,7 +137,7 @@ class BFS(UninformedSearch):
         super().__init__(map, 0)
 
 
-class BestFirstSearch(Search):
+class BestFirstSearch(ClassicalSearch):
     def __init__(self, map, h, f):
         super().__init__(map)
         self.h = h
@@ -182,7 +187,7 @@ class BestFirstSearch(Search):
                         self.search_tree[neighbor_node] = current_node
         return SearchResult(
             map=self.map,
-            path=None,
+            path=[],
             search_tree=self.search_tree,
             explored=self.explored,
         )
@@ -204,9 +209,31 @@ class GreedySearch(BestFirstSearch):
         super().__init__(map, h, f)
 
 
-class UniformCostSearch(BestFirstSearch):
+class UniformedCostSearch(BestFirstSearch):
     def __init__(self, map, h):
         def f(cost, heuristic):
             return cost
 
         super().__init__(map, h, f)
+
+
+class TourSearch(Search):
+    def __init__(self, map, meta_heuristic, alg: ClassicalSearch):
+        super().__init__(map)
+        self.meta_heuristic = meta_heuristic
+        self.alg = alg
+
+    def run(self, src, *nodes):
+        missing = list(nodes)
+        curr_node = src
+        route = [src]
+        while missing:
+            missing.sort(
+                key=lambda candidate: self.meta_heuristic(curr_node, candidate)
+            )
+            next = missing.pop(0)
+            route += self.alg.run(curr_node, next).path[1:]
+            curr_node = next
+
+        route += self.alg.run(curr_node, src).path[1:]
+        return SearchResult(route, map=self.map)
