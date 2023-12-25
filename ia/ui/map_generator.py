@@ -234,17 +234,9 @@ class MapGenerator:
         # plt.cla()
         # plt.clf()
         if self.state.G is not None and self.state.gdf is not None:
-            self.fig, self.ax = ox.plot_graph(
-                self.state.G,
-                node_size=0,
-                edge_color="w",
-                edge_linewidth=0.7,
-                show=False,
-            )
             # or plot street network and the geospatial features' footprints together
             self.fig, self.ax = ox.plot_graph(
                 self.state.G,
-                ax=self.ax,
                 node_size=0,
                 edge_color="w",
                 edge_linewidth=0.7,
