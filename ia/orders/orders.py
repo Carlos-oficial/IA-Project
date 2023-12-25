@@ -1,10 +1,10 @@
 import uuid
+
 from ia.map.place import Place
 
 
 class Order:
-
-    def __init__(self, time, place : Place):
+    def __init__(self, time, place: Place):
         self.id = uuid.uuid1()
         self.time = time
         self.place = place
@@ -12,7 +12,7 @@ class Order:
         self.status = 0
         set.status = [False, False]
 
-    def add_product(self, product : Product):
+    def add_product(self, product: Product):
         if not self.todeliver:
             self.products.add(product)
             self.weight += product.weight
@@ -34,7 +34,7 @@ class Order:
     def next_status(self, status):
         if self.status <= 0 or self.status >= 2:
             self.status = 0
-        
+
         self.status = self.status + 1
 
         if self.status >= 2:

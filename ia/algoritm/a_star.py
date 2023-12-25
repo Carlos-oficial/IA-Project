@@ -1,13 +1,29 @@
 import heapq
 from queue import PriorityQueue
 from typing import List
-from ia.map.place import Place
+
 from ia.map.map import Map
+from ia.map.place import Place
 
 # from ia.drivers.veichle import Veichle
 
 
-def a_star_search(graph: Map, start: Place, end: Place) -> List[Place]:
+def a_star_search(graph: Map, start_: Place, end_: Place) -> List[int]:
+    """Método A*
+
+    Args:
+        graph (Map): Mapa
+        start (int): onde começar
+        end (int): onde acabar
+
+    Raises:
+        Exception: se não for possivel
+
+    Returns:
+        List[int]: lista dos nodos percorridos entetre o start e end
+    """
+    start = start_
+    end = end_
     open_set = [(0, start)]
     closed_set = set()
     parents = {}

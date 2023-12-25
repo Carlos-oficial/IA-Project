@@ -1,5 +1,5 @@
-from enum import Enum
 import random
+from enum import Enum
 
 
 class Weather(Enum):

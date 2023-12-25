@@ -1,11 +1,13 @@
-from ctypes import Union
 import json
-from typing import Dict, Set, List
+import logging
+from ctypes import Union
+from typing import Dict, List, Set
 
 import networkx as nx
 
 from ia.map.place import Place
 from ia.map.road import Road
+from ia.ui.map_generator import MapGenerator, MapGeneratorState
 
 
 class Map:
@@ -20,11 +22,76 @@ class Map:
     """
 
     def __init__(self) -> None:
-        self.places: Dict[str, Place] = dict({})
+        self.places: Dict[int, Place] = dict({})
+        self.places_by_name: Dict[str, int] = dict({})
+        self.pickup_points = dict({})
         self.roads: Set[Road] = set({})
+        self.geo_features = None
+        self.location = None
+        self.networkx_graph = None
+
+    def get_place_by_name(self, name: str):
+        return self.places[self.places_by_name[name]]
 
     def add_road(self, place1: Place, place2: Place, length):
         self.roads.add(Road(place1, place2, length))
+
+    @staticmethod
+    def from_ox_graph(G):
+        map = Map()
+        map.networkx_graph = G
+
+        # Add nodes (places) to the map
+        for node, data in G.nodes(data=True):
+            print(data)
+            name = data.get("name")
+            if name is None:
+                name = node
+            warehouse = data.get("pickup")
+            if warehouse is not None:
+                map.pickup_points[warehouse] = node
+            place = Place(name, x=data["x"], y=data["y"], id=node)
+            map.places[node] = place
+            map.places_by_name[name] = node
+        # Add edges (roads) to the map
+        for edge in map.networkx_graph.edges(data=True):
+            place1 = map.places[edge[0]]
+            place2 = map.places[edge[1]]
+            length = edge[2]["length"]
+            map.add_road(place1, place2, length)
+
+        return map
+
+    @staticmethod
+    def from_map_gen_state(state: MapGeneratorState):
+        print("generating Map ")
+        map = Map()
+        map.location = state.location
+        # Clear existing places and roads
+        map.geo_features = state.gdf
+        map.networkx_graph = state.G
+
+        # Add nodes (places) to the map
+        for node, data in state.G.nodes(data=True):
+            print(str(data))
+
+            name = data.get("name")
+            if name is None:
+                name = node
+            warehouse = data.get("pickup")
+            if warehouse is not None:
+                map.pickup_points[warehouse] = node
+            place = Place(name, x=data["x"], y=data["y"], id=node)
+            map.places[node] = place
+            map.places_by_name[name] = node
+        # Add edges (roads) to the map
+        for edge in map.networkx_graph.edges(data=True):
+            place1 = map.places[edge[0]]
+            place2 = map.places[edge[1]]
+            length = edge[2]["length"]
+            map.add_road(place1, place2, length)
+
+        return map
 
     def get_neighbours(self, place):
         return list(filter(lambda r: r.get_source() == place, self.roads))
@@ -50,7 +117,7 @@ class Map:
 
     # Converte um json para Map
     @staticmethod
-    def load(file_path: str) -> "Map":
+    def load_from_json(file_path: str) -> "Map":
         with open(file_path, "r") as file:
             map_data = json.load(file)
 
@@ -74,15 +141,12 @@ class Map:
 
         return my_map
 
-    # NETWORKX
-    #
-    #
-    #
-
-    def networkx_graph(self):
+    def get_networkx_graph(self):
         """
         converte um mapa para um grafo da biblioteca networkx
         """
+        if self.G:
+            return self.G
         G = nx.Graph()
         for node in self.places.keys():
             G.add_node(node)
@@ -114,5 +178,3 @@ class Map:
             target=dest,
             weight=weight_function,
         )
-
-    # end def

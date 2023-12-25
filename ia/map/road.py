@@ -1,10 +1,12 @@
 import random
+
 from ia.map.place import Place
 from ia.map.weather import Weather
 
 
 class Road:
-    def __init__(self, src, to, length) -> None:
+    def __init__(self, src, to, length, name="") -> None:
+        self.name: str = name
         self.src: Place = src
         self.to: Place = to
         self.length: float = length
@@ -13,6 +15,9 @@ class Road:
         src_weather = src.get_weather()
         to_weather = to.get_weather()
         self.weather = random.choice([src_weather, to_weather])
+
+    def __repr__(self):
+        return f"Road ({self.name}) from {self.src.name} to {self.to.name}, Length: {self.length}, Open: {self.open}, Weather: {self.weather}\n"
 
     def vel_cap(self) -> float:
         if not self.open:
