@@ -49,31 +49,25 @@ class Map:
 
     @staticmethod
     def download_graph(location):
-        G = ox.graph_from_place(location, network_type="drive")
-        return ox.get_undirected(G)
+        return ox.graph_from_place(location, network_type="drive")
 
     def load_map_from_file(self) -> nx.MultiDiGraph:
-        # Load the graph from the GraphML file
-        self.graph = ox.load_graphml(self.filepath)
-        return self.graph
+        return ox.load_graphml(self.filepath)
 
     def fetch_map(self):
         try:
-            self.load_map_from_file()
+            g = ox.load_graphml(self.filepath)
         except Exception as e:
             g = ox.graph_from_place(self.location, network_type="drive")
-            G = ox.get_undirected(g)
-            self.geo_features = ox.features_from_place(
-                self.location, {"building": True, "highway": True}
-            )
-            self.from_nx_graph(G)
-            # Save the graph to a GraphML file
+        G = ox.get_undirected(g)
+        self.geo_features = ox.features_from_place(
+            self.location, {"building": True, "highway": True}
+        )
 
-            a = list(string.ascii_uppercase)
-            i = 0
-            for node, data in self.graph.nodes(data=True):
-                data["name"] = Map.new_unique_name()
-            ox.save_graphml(self.graph, filepath=self.filepath)
+        self.from_nx_graph(G)
+
+        ox.save_graphml(G, filepath=self.filepath)
+
         return self.graph
 
     @staticmethod
@@ -106,14 +100,19 @@ class Map:
         map.from_nx_graph(state.G)
         return map
 
-    def from_nx_graph(self, G):
+    def from_nx_graph(self, G: nx.MultiDiGraph, name_nodes: bool = False):
         self.graph = G
-        reference_lat = self.graph.nodes[list(self.graph.nodes())[0]]["y"]
-        reference_lon = self.graph.nodes[list(self.graph.nodes())[0]]["x"]
+        fst_node_data = self.graph.nodes[list(self.graph.nodes())[0]]
+        reference_lat = fst_node_data["y"]
+        reference_lon = fst_node_data["x"]
         self._reference_point = (reference_lat, reference_lon)
+        name_nodes: bool = fst_node_data.get("name") is None
+        if name_nodes:
+            for node, data in self.graph.nodes(data=True):
+                data["name"] = Map.new_unique_name()
 
         # Add nodes (places) to the map
-        for node, data in G.nodes(data=True):
+        for node, data in self.graph.nodes(data=True):
             self._node_data: Dict[node] = data
 
             self._node_positions[node] = self.referential_distance(data["y"], data["x"])
@@ -378,7 +377,6 @@ class Map:
             return cost + heuristic
 
         def h(n1, n2):
-            print(self.distance(n1, n2))
             return self.distance(n1, n2)
 
         return self.best_first_search(src, dest, f, h)
@@ -388,7 +386,6 @@ class Map:
             return heuristic
 
         def h(n1, n2):
-            print(self.distance(n1, n2))
             return self.distance(n1, n2)
 
         return self.best_first_search(src, dest, f, h)
@@ -398,7 +395,6 @@ class Map:
             return cost
 
         def h(n1, n2):
-            print(self.distance(n1, n2))
             return self.distance(n1, n2)
 
         return self.best_first_search(src, dest, f, h)

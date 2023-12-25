@@ -10,8 +10,9 @@ from ia.ui.map_generator import MapGenerator, MapGeneratorState
 map = Map("Gualtar, PT", "file")
 map.fetch_map()
 
-map.test_distances()
-if False:
+# map.test_distances()
+if True:
+    print(map._node_names)
     s = map.get_node_by_name("AA")
     d = map.get_node_by_name("GA")
     while True:
