@@ -160,7 +160,7 @@ class Map:
         )
 
         node_color = ["b" for node in self.graph.nodes]
-        fig, ax = nx.draw_networkx_nodes(
+        nx.draw_networkx_nodes(
             self.graph,
             self._render_positions,
             node_color=node_color,
@@ -172,7 +172,7 @@ class Map:
                 (u, v): f"{data['length']:.2f} m"
                 for u, v, data in self.graph.edges(data=True)
             }
-            fig, ax = nx.draw_networkx_edge_labels(
+            nx.draw_networkx_edge_labels(
                 self.graph,
                 self._render_positions,
                 edge_labels=edge_labels,
