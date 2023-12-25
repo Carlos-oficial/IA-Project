@@ -2,6 +2,7 @@ from typing import Dict
 
 from ia.drivers.veichle import Veichle
 from ia.map.place import Place
+from ia.orders.orders import Order
 
 
 class Driver:
@@ -10,7 +11,9 @@ class Driver:
         self.veichle: Veichle = veichle
         self.current_place: Place = place
         self.current_rating: float = 0
-        self.ratings: Dict[Trip, float] = dict({})
+        self.available: bool = True
+        self.trips = dict(Order)
+        self.current: Order = None
 
     def add_rating(self, rating):
         self.current_rating = (self.current_place + rating) / 2
@@ -20,3 +23,13 @@ class Driver:
 
     def set_veichle(self, veichle):
         self.veichle = veichle
+
+    def new_order(self, order: Order):
+        self.available = False
+        self.current = order
+
+    def finish_order(self):
+        self.order.deliver()
+        self.trips.add(self.order)
+        self.available = False
+        self.current = None
