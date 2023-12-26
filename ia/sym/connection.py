@@ -42,7 +42,10 @@ class Connection:
         get_all_places_for_order(order)
         all_nodes = Set.copy(order.to_visit_places).add(last_place)
 
-        RestrictedTourSearch.run(d_place, all_nodes, {last_place : order.to_visit_places})
+        return RestrictedTourSearch.run(d_place, all_nodes, {last_place : order.to_visit_places})
 
+    def run_driver_algorithm(self, driver, order):
+        pre_algorithm = self.run_pre_algorithm(driver, order)
 
+        ### Algoritmo de exploração do driver aqui (tenho que ver como fazer)
     
