@@ -11,22 +11,25 @@ from ia.ui.map_generator import MapGenerator, MapGeneratorState
 
 map = Map("Gualtar, PT", "file")
 map.fetch_map()
+map.proportion = get_proportion(map, map.distance, n=5000)
+print("Proportion is", map.proportion)
+
 
 # # s = Simulation(map)
 # s.start()
 
-AA = map.get_node_by_name("AA")
-GG = map.get_node_by_name("GG")
-AJ = map.get_node_by_name("AJ")
-GA = map.get_node_by_name("GA")
-HI = map.get_node_by_name("HI")
+# AA = map.get_node_by_name("AA")
+# GG = map.get_node_by_name("GG")
+# AJ = map.get_node_by_name("AJ")
+# GA = map.get_node_by_name("GA")
+# HI = map.get_node_by_name("HI")
 
 
-alg = AStar(map, map.distance)
-route_alg = RestrictedTourSearch(map, map.distance, alg)
-res = route_alg.run(AA, set([GG, AJ, GA, HI]), {GG: {AJ, GA}})
-print(res)
-res.plot()
-map.plot(highlight=set([AA, GG, AJ, GA, HI]))
+# alg = AStar(map, map.distance)
+# route_alg = RestrictedTourSearch(map, map.distance, alg)
+# res = route_alg.run(AA, set([GG, AJ, GA, HI]), {GG: {AJ, GA}})
+# print(res)
+# res.plot()
+# map.plot(highlight=set([AA, GG, AJ, GA, HI]))
 
 # AA AJ GA GG HI

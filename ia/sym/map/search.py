@@ -1,10 +1,13 @@
-from ia.sym.map.map import Map
-from typing import List, Dict, Set, Tuple
 import heapq
+import random
+from typing import Dict, List, Set, Tuple
+
 import matplotlib.pyplot as plt
 import networkx as nx
 import osmnx as ox
 from geopy.distance import geodesic
+
+from ia.sym.map.map import Map
 
 
 class SearchResult:
@@ -329,3 +332,22 @@ class RestrictedTourSearch(Search):
             map=self.map,
             nodes_to_highlight={node for node in self.nodes_in_tour},
         )
+
+
+def get_proportion(map: Map, heuristic, n=10):
+    """
+    computa um estimado da proporção entre distancia real e heursitica"""
+    acc = 0
+    for i in range(0, n):
+        A = random.choice(list(map._node_names.keys()))
+        B = random.choice(list(map._node_names.keys()))
+
+        H = heuristic(A, B)
+        if H == 0:
+            continue
+        alg = AStar(map, heuristic)
+        res = alg.run(A, B, reset=True)
+        len = map.path_length(res.path)
+        acc += len / H
+        # print(len,H,len/H)
+    return acc / n

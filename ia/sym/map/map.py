@@ -27,6 +27,8 @@ class Map:
         self.places: Dict[int, Place] = dict()
         self.roads: Set[Road] = set({})
         self.roads_mapped: dict = dict()
+
+        self.proportion = None
         # variaveis para cache
         self._node_positions: Dict[int, Tuple[float, float]] = dict()
         self._render_positions: dict = dict()
@@ -256,7 +258,7 @@ class Map:
 
         for i in range(len(path) - 1):
             u, v = path[i], path[i + 1]
-            edge_data = self.roads_mapped[u][v]
+            total_weight += self._edge_length(u, v)
         return total_weight
 
     def test_distances(self):
