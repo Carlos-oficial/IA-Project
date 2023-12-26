@@ -8,7 +8,7 @@ class Connection:
     def __init__(self, map):
         self.map = map
         self.drivers = dict({})
-        self.products = dict({})
+        self.products = dict({}) #Mapeia os produtos para o lugar onde estão
         self.orders = list()
 
     def new(self, map):
@@ -31,10 +31,18 @@ class Connection:
         """
         Dá uma lista de todos os lugares necessários para a order """
         products = order.products
-        p_places = list()
+        p_places = order.to_visit_places
         for p in products:
-            p_places.append(self.products.get(p))
+            place = self.products(get(p))
+            p_places.add_places_to_visit(place)
 
-        return p_places
+    def run_pre_algorithm(self, driver, order):
+        d_place = driver.place
+        last_place = order.place
+        get_all_places_for_order(order)
+        all_nodes = Set.copy(order.to_visit_places).add(last_place)
+
+        RestrictedTourSearch.run(d_place, all_nodes, {last_place : order.to_visit_places})
+
 
     

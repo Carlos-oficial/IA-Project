@@ -9,6 +9,7 @@ class Order:
         self.time = time
         self.place = place
         self.products = dict({})
+        self.to_visit_places = set()
         self.status = 0
         set.status = [False, False]
 
@@ -32,10 +33,13 @@ class Order:
         self.delivered = 2
 
     def next_status(self, status):
-        if self.status <= 0 or self.status >= 2:
+        if self.status <= 0:
             self.status = 0
 
         self.status = self.status + 1
 
         if self.status >= 2:
             self.status = 2
+
+    def add_places_to_visit(self, place):
+        self.to_visit_places.add(place)       
