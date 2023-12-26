@@ -3,6 +3,7 @@ import os
 import random
 import string
 import tkinter as tk
+import traceback
 from io import BytesIO
 from tkinter import ttk
 
@@ -67,13 +68,21 @@ class MapGeneratorState:
         self.selected_nodes = dict({})
         self.location = ""
         self.path = ""
+        self.warehouses = Warehouse.read_warehouses_from_json("aramazens.json")
+        self.warehouse_nodes = dict()
 
     def save_to_file(self, fpath):
         self.path = fpath
         os.mkdir(fpath)
+        for node, data in self.G.nodes(data=True):
+            if node in self.warehouse_nodes.keys():
+                data["pickup"] = self.warehouse_nodes[node]
         ox.save_graphml(self.G, filepath=fpath + "/osm_graph.graphml")
         with open(fpath + "/data.json", "w") as json_file:
-            data = {"location": self.location}
+            data = {
+                "location": self.location,
+                "warehouses": [w.to_dict() for w in self.warehouses],
+            }
             json.dump(data, json_file, indent=4)
 
     @staticmethod
@@ -113,8 +122,6 @@ class MapGenerator:
         self.network_labels = None
         self.show_streets = False
         self.state = MapGeneratorState()
-        self.warehouses = Warehouse.read_warehouses_from_json("aramazens.json")
-        # self.retrieve_map()
 
         self.setup_ui()
 
@@ -179,6 +186,7 @@ class MapGenerator:
             self.draw()
 
         except Exception as e:
+            traceback.print_exc()
             print(e)
             error_label = ttk.Label(self.master, text=e)
             error_label.grid(row=10, column=0, sticky="w")
@@ -187,21 +195,20 @@ class MapGenerator:
         try:
             num_points = 10
 
-            self.state.selected_nodes = {
-                k: a.name
-                for a, k in zip(
-                    self.warehouses,
-                    random.choices(
-                        list(dict(self.state.G.nodes(data=True)).keys()),
-                        k=len(self.warehouses),
-                    ),
-                )
-            }
-
+            self.state.selected_nodes = dict()
+            for a, (node, data) in zip(
+                self.state.warehouses,
+                random.choices(
+                    list(dict(self.state.G.nodes(data=True)).items()),
+                    k=len(self.state.warehouses),
+                ),
+            ):
+                self.state.selected_nodes[node] = a.name
+                self.state.warehouse_nodes[node] = a.name
             self.master.update_idletasks()
             self.draw()
         except Exception as e:
-            print(e)
+            traceback.print_exc()
             error_label = ttk.Label(self.master, text=e)
             error_label.grid(row=0, column=0)
 
@@ -264,6 +271,8 @@ class MapGenerator:
             try:
                 self.state.save_to_file(filepath)
             except Exception as e:
+                traceback.print_exc()
+
                 print(e)
                 error_label = ttk.Label(form, text=e)
                 error_label.grid(row=0, column=0)

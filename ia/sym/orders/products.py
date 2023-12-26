@@ -41,7 +41,7 @@ class Product:
 
 
 class Warehouse:
-    def __init__(self, name=""):
+    def __init__(self, name):
         self.name = name
         self.products: Dict[str, Product] = {}
 
@@ -50,10 +50,11 @@ class Warehouse:
 
     def to_dict(self):
         return {
+            "name": self.name,
             "products": {
-                name: {"weight": product.weight, "price": product.price}
+                name: {"weight": product.weight}
                 for name, product in self.products.items()
-            }
+            },
         }
 
     @classmethod
