@@ -1,6 +1,7 @@
 import time
 
 from ia.sym.map.map import Map
+from ia.sym.catalog import Catalog
 
 
 class Simulation:
@@ -29,9 +30,7 @@ class Simulation:
     def __init__(self, map):
         self.state = Simulation.State()
         self.difficulty = None
-        self.map = map
-        self.drivers = dict({})
-        self.orders = list()
+        self.facade = Connection.new()
 
     def start(self):
         while True:

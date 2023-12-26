@@ -8,9 +8,11 @@ class Product:
         self.weight = weight
         if name not in Product.names:
             self.name = name
-            self.id = hash(name)
         else:
             raise Exception("Product already exists")
+
+    def get_name(self):
+        return self.name
 
     def set_price(self, price):
         if price <= 0:

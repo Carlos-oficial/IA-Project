@@ -13,6 +13,7 @@ class Driver:
         self.available: bool = True
         self.trips = dict(Order)
         self.current: Order = None
+        self.id = None
 
     def add_rating(self, rating):
         self.current_rating = (self.current_place + rating) / 2
@@ -26,6 +27,9 @@ class Driver:
     def new_order(self, order: Order):
         self.available = False
         self.current = order
+
+    def set_id(self, id):
+        self.id = id
 
     def finish_order(self):
         self.order.deliver()
