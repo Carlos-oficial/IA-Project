@@ -4,16 +4,16 @@ import osmnx as ox
 from ia.sym.map.map import Map
 from ia.sym.map.search import *
 from ia.sym.sym import Simulation
-from ia.ui.map_generator import MapGenerator, MapGeneratorState
+from ia.sym.ui.map_generator import MapGenerator, MapGeneratorState
 
-# s = MapGenerator.run()
-# map = Map.from_map_gen_state(s)
+s = MapGenerator.run()
+map = Map.from_map_gen_state(s)
 
-map = Map("Gualtar, PT", "file")
-map.fetch_map()
-map.proportion = get_proportion(map, map.distance, n=5000)
-print("Proportion is", map.proportion)
-
+# map = Map("Gualtar, PT", "file")
+# map.fetch_map()
+# map.proportion = get_proportion(map, map.distance, n=5000)
+# print("Proportion is", map.proportion)
+#
 
 # # s = Simulation(map)
 # s.start()

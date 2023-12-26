@@ -8,10 +8,54 @@ from tkinter import ttk
 
 import geopandas as gpd
 import networkx as nx
+import numpy as np
 import osmnx as ox
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from PIL import Image, ImageTk
+from scipy.spatial import cKDTree
+from sklearn.cluster import KMeans
+
+from ia.sym.orders.products import Product, Warehouse
+
+
+def hilbert_curve(width, height, num_points):
+    t = np.arange(0, num_points, dtype=np.float32) / num_points
+    x = np.mod(np.floor(t * width), width)
+    y = np.floor(t * height / width)
+    indices = np.argsort(np.argsort(x + y * width))
+    return np.column_stack((x[indices], y[indices]))
+
+
+def distribute_nodes_evenly(coords_dict, num_nodes, w, h):
+    coordinates = np.array(list(coords_dict.keys()))
+    hilbert_points = hilbert_curve(w, h, num_nodes)
+    print("hilbert_points:", hilbert_points)
+    kdtree = cKDTree(coordinates)
+    _, indices = kdtree.query(hilbert_points)
+
+    result = {
+        tuple(hilbert_points[i]): list(coords_dict.keys())[indices[i]]
+        for i in range(num_nodes)
+    }
+    return result
+
+
+def calculate_graph_dimensions(coords):
+    """
+    Calculate the width and height of a graph using its coordinates.
+
+    Parameters:
+    - coords_map: Dictionary mapping nodes to (x, y) coordinates.
+
+    Returns:
+    - Tuple containing the width and height of the graph.
+    """
+    x_values = [x for (x, _) in coords]
+    y_values = [y for (_, y) in coords]
+    width = max(x_values) - min(x_values)
+    height = max(y_values) - min(y_values)
+    return width, height
 
 
 class MapGeneratorState:
@@ -69,7 +113,11 @@ class MapGenerator:
         self.network_labels = None
         self.show_streets = False
         self.state = MapGeneratorState()
+        self.warehouses = Warehouse.read_warehouses_from_json("aramazens.json")
+        # self.retrieve_map()
+
         self.setup_ui()
+
         # STATe
 
     def setup_ui(self):
@@ -112,7 +160,7 @@ class MapGenerator:
         self.show_streets = not self.show_streets
         self.draw()
 
-    def retrieve_map(self):
+    def retrieve_map(self, where="gualtar"):
         try:
             self.state.selected_nodes = dict({})
             # Get location from the entry
@@ -139,20 +187,14 @@ class MapGenerator:
         try:
             num_points = 10
 
-            # Calculate node centrality measures (e.g., degree centrality)
-            centrality = nx.degree_centrality(self.state.G)
-
-            # Get the nodes with highest centrality
-            def take1(l):
-                elem = random.choice(l)
-                l.remove(elem)
-                return elem
-
-            letters = list(string.ascii_uppercase)
             self.state.selected_nodes = {
-                k: v["name"]
-                for k, v in random.choices(
-                    list(dict(self.state.G.nodes(data=True)).items()), k=10
+                k: a.name
+                for a, k in zip(
+                    self.warehouses,
+                    random.choices(
+                        list(dict(self.state.G.nodes(data=True)).keys()),
+                        k=len(self.warehouses),
+                    ),
                 )
             }
 

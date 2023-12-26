@@ -1,7 +1,6 @@
 import time
 
 from ia.sym.map.map import Map
-from ia.sym.catalog import Catalog
 
 
 class Simulation:

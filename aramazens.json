@@ -1,0 +1,32 @@
+[
+    {
+      "name": "Fnac",
+      "products": {
+        "Impressora": {"weight": 20},
+        "Livros": {"weight": 5}
+      }
+    },
+    {
+      "name": "JOM",
+      "products": {
+        "Maquina de lavar": {"weight": 50}
+      }
+    },
+    {
+      "name": "Continente",
+      "products": {
+        "Leite": {"weight": 1.0},
+        "Carne": {"weight": 5.0},
+        "Agua": {"weight": 20.0}
+      }
+    },
+
+    {
+      "name": "Padaria",
+      "products": {
+        "Pao": {"weight": 1}
+
+      }
+    }
+  ]
+  
