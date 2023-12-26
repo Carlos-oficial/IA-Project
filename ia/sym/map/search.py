@@ -7,7 +7,11 @@ import osmnx as ox
 from geopy.distance import geodesic
 
 
-class SearchResultOnMap:
+class SearchResult:
+    pass
+
+
+class SearchResultOnMap(SearchResult):
     def __init__(
         self,
         path: List[int],
@@ -15,15 +19,17 @@ class SearchResultOnMap:
         search_tree: Dict[int, int] = dict(),
         explored=set(),
         nodes_to_highlight=set(),
+        **kwargs,
     ):
         self.map: Map = map
         self.path = path
         self.search_tree: Dict[int, int] = search_tree
         self.explored: Set[int] = explored
         self.nodes_to_highlight = nodes_to_highlight
+        self.passed_kwargs = kwargs
 
     def __repr__(self):
-        return f"SearchResult(path={self.path}\n search_tree={self.search_tree}\n explored={self.explored})"
+        return f"SearchResult(path={self.path}\n search_tree={self.search_tree}\n explored={self.explored},kwargs={self.passed_kwargs})"
 
     def get_tree_edges(self) -> Set[Tuple[int, int]]:
         tree_edges = set()
@@ -90,7 +96,7 @@ class SearchResultOnMap:
 
 
 class Search:
-    def run() -> SearchResultOnMap:
+    def run() -> SearchResult:
         pass
 
 
@@ -237,7 +243,7 @@ class GreedySearch(BestFirstSearch):
         super().__init__(map, h, f)
 
 
-class UniformedCostSearch(BestFirstSearch):
+class UniformCostSearch(BestFirstSearch):
     def __init__(self, map, h):
         def f(cost, heuristic):
             return cost
@@ -272,6 +278,54 @@ class TourSearch(Search):
         route += r.path[1:]
         return SearchResultOnMap(
             route,
+            map=self.map,
+            nodes_to_highlight={node for node in self.nodes_in_tour},
+        )
+
+
+class RestrictedTourSearch(Search):
+    def __init__(self, map, meta_heuristic, alg: ClassicalSearch):
+        self.map = map
+        self.meta_heuristic = meta_heuristic
+        self.alg = alg
+        self.nodes_in_tour = list()
+        self.pseudo_route = []
+
+    def run(self, src, nodes: Set[int], order_restrictions: Dict[int, Set[int]]):
+        self.nodes_in_tour = [src] + list(nodes)
+        missing = set(nodes)
+        completed = set()
+        curr_node = src
+        route = [src]
+        self.pseudo_route = [src]
+        while missing:
+            possible = missing.intersection(
+                {n for n in nodes if not order_restrictions.get(n)}
+            )
+            next = min(
+                possible,
+                key=lambda candidate: self.meta_heuristic(curr_node, candidate),
+            )
+            missing.remove(next)
+            self.pseudo_route.append(next)
+
+            for g, s in order_restrictions.items():
+                try:
+                    s.remove(next)
+                except Exception as e:
+                    pass
+
+            r = self.alg.run(curr_node, next)
+            self.alg.reset()
+            route += r.path[1:]
+            curr_node = next
+
+        r = self.alg.run(curr_node, src)
+
+        route += r.path[1:]
+        return SearchResultOnMap(
+            route,
+            pseudo_route=self.pseudo_route,
             map=self.map,
             nodes_to_highlight={node for node in self.nodes_in_tour},
         )

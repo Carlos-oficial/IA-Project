@@ -138,7 +138,9 @@ class Map:
 
         return map
 
-    def plot(self, show_edge_lables=False, route=None):
+    def plot(
+        self, show_edge_lables=False, route=None, show=True, highlight: Set[int] = {}
+    ):
         fig, ax = ox.plot_graph(
             self.graph,
             node_size=0,
@@ -159,7 +161,8 @@ class Map:
             ax=ax,
         )
 
-        node_color = ["b" for node in self.graph.nodes]
+        node_color = ["r" if node in highlight else "w" for node in self.graph.nodes]
+
         nx.draw_networkx_nodes(
             self.graph,
             self._render_positions,
@@ -183,9 +186,13 @@ class Map:
             )
 
         # Plot all nodes in blue
-        for node, (x, y) in self._render_positions.items():
-            plt.scatter(x, y, color="blue", marker="o", s=30)
-        plt.show()
+        # for node, (x, y) in self._render_positions.items():
+        #     pass
+        # plt.scatter(x, y, color="blue", marker="o", s=30)
+
+        if show:
+            plt.show()
+        return fig, ax
 
     def add_road(self, place1: Place, place2: Place, length):
         road = Road(place1, place2, length)
