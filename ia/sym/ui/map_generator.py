@@ -86,6 +86,36 @@ class MapGeneratorState:
             json.dump(data, json_file, indent=4)
 
     @staticmethod
+    def load_from_file(fpath):
+        state = MapGeneratorState()
+        data_json_path = os.path.join(fpath, "data.json")
+        with open(data_json_path, "r") as json_file:
+            data = json.load(json_file)
+
+            # Set attributes from the loaded data
+            state.location = data["location"]
+            state.warehouses = [Warehouse.from_dict(w) for w in data["warehouses"]]
+
+        # Load graph
+        graphml_path = os.path.join(fpath, "osm_graph.graphml")
+        state.G = ox.load_graphml(graphml_path)
+        state.gdf = ox.features_from_place(
+            state.location, {"building": True, "highway": True}
+        )
+        # Load data.json
+
+        # Update warehouse nodes
+        state.warehouse_nodes = {}
+        for node, data in state.G.nodes(data=True):
+            if "pickup" in data:
+                state.warehouse_nodes[node] = data["pickup"]
+
+        # Update path
+        state.path = fpath
+
+        return state
+
+    @staticmethod
     def new_unique_name():
         def number_to_letters(n):
             result = ""
