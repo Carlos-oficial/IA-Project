@@ -1,19 +1,29 @@
 import json
 import uuid
-from typing import List, Set
+from typing import Any, Dict, List, Set
 
 from ia.sym.map.place import Place
 
 
 class Product:
-    names: Set[str] = set()
+    names: Dict[str, Any] = dict()
 
     def __init__(self, name: str, weight: float):
-        self.weight: float = weight
-        if name not in Product.names:
+        if name not in Product.names.keys():
+            self.weight: float = weight
             self.name: str = name
+            Product.names[name] = self
         else:
-            raise Exception("Product already exists")
+            self = Product.names[name]
+
+    @staticmethod
+    def new(name: str, weight: float):
+        if name not in Product.names.keys():
+            p = Product(name, weight)
+            Product.names[name] = p
+            return p
+        else:
+            return Product.names[name]
 
     @staticmethod
     def products_from_json(filename) -> List["Product"]:
@@ -22,7 +32,7 @@ class Product:
             data = json.load(file)
             for product_data in data:
                 try:
-                    product = Product(
+                    product = Product.new(
                         name=product_data["name"], weight=product_data["weight"]
                     )
                     products.append(product)
@@ -61,7 +71,7 @@ class Warehouse:
     def from_dict(cls, data):
         warehouse = Warehouse(data["name"])
         for name, product_data in data["products"].items():
-            warehouse.add_product(Product(name=name, weight=product_data["weight"]))
+            warehouse.add_product(Product.new(name=name, weight=product_data["weight"]))
         return warehouse
 
     def __repr__(self):

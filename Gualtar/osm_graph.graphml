@@ -101,6 +101,7 @@
       <data key="d5">-8.3801257</data>
       <data key="d6">3</data>
       <data key="d7">M</data>
+      <data key="d9">Talho</data>
     </node>
     <node id="242543311">
       <data key="d4">41.5689391</data>
@@ -113,12 +114,14 @@
       <data key="d5">-8.3761858</data>
       <data key="d6">3</data>
       <data key="d7">O</data>
+      <data key="d9">Padaria2</data>
     </node>
     <node id="343671198">
       <data key="d4">41.5645829</data>
       <data key="d5">-8.3991617</data>
       <data key="d6">3</data>
       <data key="d7">P</data>
+      <data key="d9">Padaria</data>
     </node>
     <node id="343671201">
       <data key="d4">41.5652349</data>
@@ -137,7 +140,6 @@
       <data key="d5">-8.3926552</data>
       <data key="d6">3</data>
       <data key="d7">S</data>
-      <data key="d9">Fnac</data>
     </node>
     <node id="343672931">
       <data key="d4">41.5638782</data>
@@ -180,6 +182,7 @@
       <data key="d5">-8.3909029</data>
       <data key="d6">3</data>
       <data key="d7">Z</data>
+      <data key="d9">Padaria2</data>
     </node>
     <node id="512536224">
       <data key="d4">41.5620293</data>
@@ -270,6 +273,7 @@
       <data key="d5">-8.3901172</data>
       <data key="d6">4</data>
       <data key="d7">AO</data>
+      <data key="d9">Continente</data>
     </node>
     <node id="667884483">
       <data key="d4">41.5649223</data>
@@ -318,6 +322,7 @@
       <data key="d5">-8.3900022</data>
       <data key="d6">1</data>
       <data key="d7">AW</data>
+      <data key="d9">Fnac</data>
     </node>
     <node id="698805816">
       <data key="d4">41.5648934</data>
@@ -336,6 +341,7 @@
       <data key="d5">-8.3901192</data>
       <data key="d6">1</data>
       <data key="d7">AZ</data>
+      <data key="d9">Padaria2</data>
     </node>
     <node id="698805819">
       <data key="d4">41.5637981</data>
@@ -373,6 +379,7 @@
       <data key="d5">-8.391601</data>
       <data key="d6">3</data>
       <data key="d7">BF</data>
+      <data key="d9">JOM</data>
     </node>
     <node id="698841689">
       <data key="d4">41.5603738</data>
@@ -403,6 +410,7 @@
       <data key="d5">-8.3815532</data>
       <data key="d6">4</data>
       <data key="d7">BK</data>
+      <data key="d9">Padaria</data>
     </node>
     <node id="1214741669">
       <data key="d4">41.5711733</data>
@@ -525,6 +533,7 @@
       <data key="d5">-8.3854539</data>
       <data key="d6">3</data>
       <data key="d7">CE</data>
+      <data key="d9">Talho</data>
     </node>
     <node id="1234596221">
       <data key="d4">41.5675585</data>
@@ -573,6 +582,7 @@
       <data key="d5">-8.3957762</data>
       <data key="d6">3</data>
       <data key="d7">CM</data>
+      <data key="d9">JOM</data>
     </node>
     <node id="1474433420">
       <data key="d4">41.5663056</data>
@@ -633,6 +643,7 @@
       <data key="d5">-8.3957272</data>
       <data key="d6">3</data>
       <data key="d7">CW</data>
+      <data key="d9">Padaria2</data>
     </node>
     <node id="1683160021">
       <data key="d4">41.5645321</data>
@@ -669,6 +680,7 @@
       <data key="d5">-8.380353</data>
       <data key="d6">3</data>
       <data key="d7">DC</data>
+      <data key="d9">Padaria2</data>
     </node>
     <node id="1683160042">
       <data key="d4">41.5659252</data>
@@ -681,12 +693,14 @@
       <data key="d5">-8.3819297</data>
       <data key="d6">3</data>
       <data key="d7">DE</data>
+      <data key="d9">JOM</data>
     </node>
     <node id="1683160058">
       <data key="d4">41.5670408</data>
       <data key="d5">-8.3862664</data>
       <data key="d6">3</data>
       <data key="d7">DF</data>
+      <data key="d9">Padaria</data>
     </node>
     <node id="1683160060">
       <data key="d4">41.5671864</data>
@@ -705,6 +719,7 @@
       <data key="d5">-8.3792372</data>
       <data key="d6">3</data>
       <data key="d7">DI</data>
+      <data key="d9">Continente</data>
     </node>
     <node id="1683160075">
       <data key="d4">41.5679083</data>
@@ -832,6 +847,7 @@
       <data key="d5">-8.3849816</data>
       <data key="d6">3</data>
       <data key="d7">ED</data>
+      <data key="d9">Talho</data>
     </node>
     <node id="1683182826">
       <data key="d4">41.5708109</data>
@@ -850,12 +866,14 @@
       <data key="d5">-8.3840251</data>
       <data key="d6">3</data>
       <data key="d7">EG</data>
+      <data key="d9">Continente</data>
     </node>
     <node id="1683182834">
       <data key="d4">41.5714996</data>
       <data key="d5">-8.3848602</data>
       <data key="d6">3</data>
       <data key="d7">EH</data>
+      <data key="d9">JOM</data>
     </node>
     <node id="1683182836">
       <data key="d4">41.5715258</data>
@@ -880,6 +898,7 @@
       <data key="d5">-8.3800767</data>
       <data key="d6">3</data>
       <data key="d7">EL</data>
+      <data key="d9">Fnac</data>
     </node>
     <node id="1683182883">
       <data key="d4">41.5734898</data>
@@ -916,6 +935,7 @@
       <data key="d5">-8.3831037</data>
       <data key="d6">3</data>
       <data key="d7">ER</data>
+      <data key="d9">Padaria</data>
     </node>
     <node id="1745799289">
       <data key="d4">41.5714606</data>
@@ -928,6 +948,7 @@
       <data key="d5">-8.3787918</data>
       <data key="d6">3</data>
       <data key="d7">ET</data>
+      <data key="d9">Fnac</data>
     </node>
     <node id="1745799298">
       <data key="d4">41.5704443</data>
@@ -976,12 +997,14 @@
       <data key="d5">-8.3762792</data>
       <data key="d6">2</data>
       <data key="d7">FB</data>
+      <data key="d9">Fnac</data>
     </node>
     <node id="1745799342">
       <data key="d4">41.5714932</data>
       <data key="d5">-8.3787266</data>
       <data key="d6">3</data>
       <data key="d7">FC</data>
+      <data key="d9">JOM</data>
     </node>
     <node id="1745799346">
       <data key="d4">41.5698142</data>
@@ -1012,6 +1035,7 @@
       <data key="d5">-8.3792129</data>
       <data key="d6">3</data>
       <data key="d7">FH</data>
+      <data key="d9">Fnac</data>
     </node>
     <node id="1745799357">
       <data key="d4">41.5730151</data>
@@ -1030,7 +1054,6 @@
       <data key="d5">-8.3782077</data>
       <data key="d6">1</data>
       <data key="d7">FK</data>
-      <data key="d9">Padaria</data>
     </node>
     <node id="1745799365">
       <data key="d4">41.5721199</data>
@@ -1067,6 +1090,7 @@
       <data key="d5">-8.3785404</data>
       <data key="d6">3</data>
       <data key="d7">FQ</data>
+      <data key="d9">Talho</data>
     </node>
     <node id="1745799389">
       <data key="d4">41.571846</data>
@@ -1079,6 +1103,7 @@
       <data key="d5">-8.3786559</data>
       <data key="d6">3</data>
       <data key="d7">FS</data>
+      <data key="d9">Padaria</data>
     </node>
     <node id="1745812864">
       <data key="d4">41.5733431</data>
@@ -1115,7 +1140,6 @@
       <data key="d5">-8.3815251</data>
       <data key="d6">3</data>
       <data key="d7">FY</data>
-      <data key="d9">JOM</data>
     </node>
     <node id="1745821880">
       <data key="d4">41.5664421</data>
@@ -1146,6 +1170,7 @@
       <data key="d5">-8.3841861</data>
       <data key="d6">3</data>
       <data key="d7">GD</data>
+      <data key="d9">Talho</data>
     </node>
     <node id="1745837943">
       <data key="d4">41.5664688</data>
@@ -1176,13 +1201,13 @@
       <data key="d5">-8.38916</data>
       <data key="d6">1</data>
       <data key="d7">GI</data>
-      <data key="d9">Continente</data>
     </node>
     <node id="1818311435">
       <data key="d4">41.5617452</data>
       <data key="d5">-8.3923488</data>
       <data key="d6">1</data>
       <data key="d7">GJ</data>
+      <data key="d9">Talho</data>
     </node>
     <node id="1818311890">
       <data key="d4">41.563902</data>
@@ -1267,6 +1292,7 @@
       <data key="d5">-8.3780922</data>
       <data key="d6">4</data>
       <data key="d7">GX</data>
+      <data key="d9">Continente</data>
     </node>
     <node id="2062531165">
       <data key="d4">41.5692137</data>
@@ -1327,6 +1353,7 @@
       <data key="d5">-8.3778209</data>
       <data key="d6">3</data>
       <data key="d7">HH</data>
+      <data key="d9">Continente</data>
     </node>
     <node id="2179819446">
       <data key="d4">41.5700643</data>
@@ -1339,6 +1366,7 @@
       <data key="d5">-8.3779615</data>
       <data key="d6">3</data>
       <data key="d7">HJ</data>
+      <data key="d9">Fnac</data>
     </node>
     <node id="2232799434">
       <data key="d4">41.568546</data>
@@ -1448,12 +1476,14 @@
       <data key="d5">-8.3988297</data>
       <data key="d6">3</data>
       <data key="d7">IB</data>
+      <data key="d9">Continente</data>
     </node>
     <node id="5159300775">
       <data key="d4">41.5654826</data>
       <data key="d5">-8.3948168</data>
       <data key="d6">3</data>
       <data key="d7">IC</data>
+      <data key="d9">JOM</data>
     </node>
     <node id="5159300781">
       <data key="d4">41.5644457</data>
@@ -1478,6 +1508,7 @@
       <data key="d5">-8.3757512</data>
       <data key="d6">1</data>
       <data key="d7">IG</data>
+      <data key="d9">Padaria</data>
     </node>
     <node id="6715187014">
       <data key="d4">41.5743121</data>
@@ -1538,6 +1569,7 @@
       <data key="d5">-8.3876269</data>
       <data key="d6">3</data>
       <data key="d7">IQ</data>
+      <data key="d9">Padaria2</data>
     </node>
     <node id="9760091638">
       <data key="d4">41.5653206</data>
@@ -1943,7 +1975,7 @@
     </edge>
     <edge source="343671329" target="5159300785" id="0">
       <data key="d10">[262482801, 155994068]</data>
-      <data key="d13">['Rua da Bouça', 'Rua do Pinheiro Manso']</data>
+      <data key="d13">['Rua do Pinheiro Manso', 'Rua da Bouça']</data>
       <data key="d14">residential</data>
       <data key="d15">False</data>
       <data key="d16">False</data>
@@ -5763,7 +5795,7 @@
     </edge>
     <edge source="2062528751" target="2062528846" id="0">
       <data key="d10">[196331136, 726989592]</data>
-      <data key="d13">['Rua de Novaínho', 'Rua de Pousada']</data>
+      <data key="d13">['Rua de Pousada', 'Rua de Novaínho']</data>
       <data key="d14">residential</data>
       <data key="d15">False</data>
       <data key="d16">False</data>
@@ -5814,7 +5846,7 @@
     </edge>
     <edge source="2062528846" target="2062528751" id="0">
       <data key="d10">[726989592, 196331136]</data>
-      <data key="d13">['Rua de Novaínho', 'Rua de Pousada']</data>
+      <data key="d13">['Rua de Pousada', 'Rua de Novaínho']</data>
       <data key="d14">residential</data>
       <data key="d15">False</data>
       <data key="d16">True</data>
@@ -6877,7 +6909,7 @@
       <data key="d16">False</data>
       <data key="d17">5.753</data>
     </edge>
-    <data key="d0">2023-12-26 22:11:53</data>
+    <data key="d0">2023-12-26 22:51:45</data>
     <data key="d1">OSMnx 1.8.0</data>
     <data key="d2">epsg:4326</data>
     <data key="d3">True</data>

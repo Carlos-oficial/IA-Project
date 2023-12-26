@@ -1,5 +1,5 @@
 {
-    "location": "Gualtar, PT",
+    "location": "Gualtar",
     "warehouses": [
         {
             "name": "Fnac",
@@ -26,16 +26,29 @@
                 "Leite": {
                     "weight": 1.0
                 },
-                "Carne": {
-                    "weight": 5.0
-                },
                 "Agua": {
                     "weight": 20.0
                 }
             }
         },
         {
+            "name": "Talho",
+            "products": {
+                "Carne": {
+                    "weight": 5.0
+                }
+            }
+        },
+        {
             "name": "Padaria",
+            "products": {
+                "Pao": {
+                    "weight": 1
+                }
+            }
+        },
+        {
+            "name": "Padaria2",
             "products": {
                 "Pao": {
                     "weight": 1
