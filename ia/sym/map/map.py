@@ -12,7 +12,11 @@ from ia.sym.map.road import Road
 from ia.sym.ui.map_generator import MapGeneratorState
 
 
-class Map:
+class Problem:
+    pass
+
+
+class Map(Problem):
     _id = 0
 
     def __init__(self, location: str, filepath: str):
@@ -187,11 +191,6 @@ class Map:
                 ax=ax,
             )
 
-        # Plot all nodes in blue
-        # for node, (x, y) in self._render_positions.items():
-        #     pass
-        # plt.scatter(x, y, color="blue", marker="o", s=30)
-
         if show:
             plt.show()
         return fig, ax
@@ -226,7 +225,10 @@ class Map:
         edge_data = self.graph.get_edge_data(u, v)
         return edge_data[0]["length"]
 
-    def edge_length(self, u, v) -> float:
+    def cost_function(self, u, v):
+        return self.road_length(u, v)
+
+    def road_length(self, u, v) -> float:
         try:
             road: Road = self.roads_mapped[u][v]
             return road.length

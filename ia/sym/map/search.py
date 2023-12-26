@@ -104,7 +104,13 @@ class Search:
 
 
 class ClassicalSearch(Search):
-    def __init__(self, map: Map):
+    def __init__(self, map: Map, cost_function=None):
+        if cost_function is None:
+            if hasattr(map, "cost_function"):
+                self.cost_function = map.cost_function
+            self.cost_function = map.road_length
+        else:
+            self.cost_function = cost_function
         self.map = map
         self.explored: Set[int] = set()
         self.search_tree: Dict[int, int] = dict()
@@ -117,8 +123,8 @@ class ClassicalSearch(Search):
 
 
 class UninformedSearch(ClassicalSearch):
-    def __init__(self, map, pop_index):
-        super().__init__(map)
+    def __init__(self, map, pop_index, cost_function=None):
+        super().__init__(map, cost_function=cost_function)
         self.pop_index: int = pop_index
 
     def run(self, src, dest, reset=False):
@@ -168,8 +174,8 @@ class BFS(UninformedSearch):
 
 
 class BestFirstSearch(ClassicalSearch):
-    def __init__(self, map, h, f):
-        super().__init__(map)
+    def __init__(self, map, h, f, cost_function=None):
+        super().__init__(map, cost_function)
         self.h = h
         self.f = f
         self.costs = dict()
@@ -208,7 +214,7 @@ class BestFirstSearch(ClassicalSearch):
             self.explored.add(current_node)
 
             for neighbor_node in self.map.neighbours(current_node):
-                new_cost = self.costs[current_node] + self.map.edge_length(
+                new_cost = self.costs[current_node] + self.cost_function(
                     current_node, neighbor_node
                 )
                 estimated_cost = self.h(neighbor_node, dest)
@@ -231,31 +237,31 @@ class BestFirstSearch(ClassicalSearch):
 
 
 class AStar(BestFirstSearch):
-    def __init__(self, map, h):
+    def __init__(self, map, h, cost_function=None):
         def f(cost, heuristic):
             return cost + heuristic
 
-        super().__init__(map, h, f)
+        super().__init__(map, h, f, cost_function=cost_function)
 
 
 class GreedySearch(BestFirstSearch):
-    def __init__(self, map, h):
+    def __init__(self, map, h, cost_function=None):
         def f(cost, heuristic):
             return heuristic
 
-        super().__init__(map, h, f)
+        super().__init__(map, h, f, cost_function=cost_function)
 
 
 class UniformCostSearch(BestFirstSearch):
-    def __init__(self, map, h):
+    def __init__(self, map, cost_function=None):
         def f(cost, heuristic):
             return cost
 
-        super().__init__(map, h, f)
+        super().__init__(map, h, f, cost_function=cost_function)
 
 
 class TourSearch(Search):
-    def __init__(self, map, meta_heuristic, alg: ClassicalSearch):
+    def __init__(self, map, meta_heuristic, alg: ClassicalSearch, cost_function=None):
         self.map = map
         self.meta_heuristic = meta_heuristic
         self.alg = alg
