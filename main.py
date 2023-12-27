@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import osmnx as ox
 
 from ia.sym.map.map import Map
+from ia.sym.drivers.driver import Driver
+from ia.sym.drivers.veichle import *
 from ia.sym.map.search import *
 from ia.sym.sym import Simulation
 from ia.sym.ui.map_generator import MapGenerator, MapGeneratorState
@@ -9,7 +11,16 @@ from ia.sym.ui.map_generator import MapGenerator, MapGeneratorState
 s = MapGeneratorState.load_from_file("Gualtar")
 # s = MapGenerator.run()
 map = Map.from_map_gen_state(s)
-s = Simulation(map)
+nodes = list(map.graph.nodes)
+
+dirvers = {
+    Driver("Júlio", Bike()): random.choice(nodes),
+    Driver("Carlos", Bike()): random.choice(nodes),
+    Driver("Gerson", Car()): random.choice(nodes),
+    Driver("Filipe", Bycicle()): random.choice(nodes),
+}
+
+s = Simulation(map, dirvers)
 s.start()
 
 # map = Map("Gualtar, PT", "file")

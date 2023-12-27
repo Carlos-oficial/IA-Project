@@ -145,7 +145,12 @@ class Map(Problem):
         return map
 
     def plot(
-        self, show_edge_lables=False, route=None, show=True, highlight: Set[int] = {}
+        self,
+        show_node_lables=True,
+        show_edge_lables=False,
+        route=None,
+        show=True,
+        highlight: Set[int] = {},
     ):
         fig, ax = ox.plot_graph(
             self.graph,
@@ -158,14 +163,27 @@ class Map(Problem):
         nx.draw_networkx_labels(
             self.graph,
             pos=self._render_positions,
-            labels=self._node_names,
-            font_color="w",
+            labels={node: name for name, node in self.pickup_points.items()},
+            bbox=dict(facecolor="skyblue", alpha=0.5),
+            font_color="b",
             font_size=10,
-            font_weight="light",
+            font_weight="bold",
             horizontalalignment="right",
             verticalalignment="bottom",
             ax=ax,
         )
+        if show_node_lables:
+            nx.draw_networkx_labels(
+                self.graph,
+                pos=self._render_positions,
+                labels=self._node_names,
+                font_color="w",
+                font_size=10,
+                font_weight="light",
+                horizontalalignment="right",
+                verticalalignment="bottom",
+                ax=ax,
+            )
 
         node_color = ["r" if node in highlight else "w" for node in self.graph.nodes]
 

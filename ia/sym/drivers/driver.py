@@ -1,17 +1,18 @@
 from typing import *
 import uuid
-from ia.drivers.veichle import Veichle
+from ia.sym.drivers.veichle import Veichle
 from ia.sym.map.place import Place
+from ia.sym.orders.products import *
 
 
 class Driver:
-    def __init__(self, name, veichle, place) -> None:
+    def __init__(self, name, veichle) -> None:
         self.id = uuid.uuid1()
         self.name: str = name
         self.veichle: Veichle = veichle
         self.ratings: List[float] = 0
         self.available: bool = True
-        self.trips = dict(Order)
+        self.trips = dict()
         self.current: Order = None
 
     def add_rating(self, rating):

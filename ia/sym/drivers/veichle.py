@@ -24,7 +24,7 @@ class Car(Veichle):
     """
 
     def __init__(self):
-        super().__init__(self, 50, 50, 100, 0.1, 0.251)
+        super().__init__(50, 50, 100, 0.1, 0.251)
 
 
 class Bike(Veichle):
@@ -34,9 +34,9 @@ class Bike(Veichle):
     """
 
     def __init__(self):
-        super().__init__(self, 35, 35, 20, 0.5, 0.1)
+        super().__init__(35, 35, 20, 0.5, 0.1)
 
 
 class Bycicle(Veichle):
     def __init__(self):
-        super().__init__(self, 10, 10, 5, 0.6, 0)
+        super().__init__(10, 10, 5, 0.6, 0)

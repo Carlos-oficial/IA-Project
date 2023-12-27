@@ -1,7 +1,6 @@
 from ia.sym.drivers.driver import Driver
 from ia.sym.map.map import Map
-from ia.sym.products.product import Product
-from ia.sym.products.products import Order
+from ia.sym.orders.products import *
 
 
 class Connection:
