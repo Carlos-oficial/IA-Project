@@ -9,6 +9,8 @@ from ia.sym.ui.map_generator import MapGenerator, MapGeneratorState
 s = MapGeneratorState.load_from_file("Gualtar")
 # s = MapGenerator.run()
 map = Map.from_map_gen_state(s)
+s = Simulation(map)
+s.start()
 
 # map = Map("Gualtar, PT", "file")
 # map.fetch_map()
@@ -16,21 +18,19 @@ map = Map.from_map_gen_state(s)
 # print("Proportion is", map.proportion)
 #
 
-# # s = Simulation(map)
-# s.start()
 
-AA = map.get_node_by_name("AA")
-GG = map.get_node_by_name("GG")
-AJ = map.get_node_by_name("AJ")
-GA = map.get_node_by_name("GA")
-HI = map.get_node_by_name("HI")
+# AA = map.get_node_by_name("AA")
+# GG = map.get_node_by_name("GG")
+# AJ = map.get_node_by_name("AJ")
+# GA = map.get_node_by_name("GA")
+# HI = map.get_node_by_name("HI")
 
 
-alg = AStar(map, map.distance)
-route_alg = RestrictedTourSearch(map, map.distance, alg)
-res = route_alg.run(AA, set([GG, AJ, GA, HI]), {GG: {AJ, GA}})
-print(res)
-res.plot()
+# alg = AStar(map, map.distance)
+# route_alg = RestrictedTourSearch(map, map.distance, alg)
+# res = route_alg.run(AA, set([GG, AJ, GA, HI]), {GG: {AJ, GA}})
+# print(res)
+# res.plot()
 
 # map.plot(highlight=set([AA, GG, AJ, GA, HI]))
 

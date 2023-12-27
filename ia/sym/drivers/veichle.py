@@ -12,7 +12,7 @@ class Veichle:
     def cargo_weight(self):
         return 0
 
-    def calc_velocity(self):
+    def calc_max_velocity(self):
         return self.avg_velocity - self.cargo_weight() * self.vel_decrement
 
 
