@@ -1,7 +1,7 @@
 import time
 import matplotlib.pyplot as plt
 import networkx as nx
-
+import traceback
 from ia.sym.map.map import Map
 from ia.sym.orders.products import *
 from ia.sym.drivers.driver import *
@@ -17,10 +17,19 @@ class Simulation:
         EASY = "easy"
         NORMAL = "normal"
 
-    def __init__(self, map, drivers: Dict[Driver, int]):
+    def __init__(self, map: Map, drivers: Dict[Driver, int], warehouses=dict()):
         self.difficulty = None
         self.clock: int = 0
         self.map = map
+        self.places: Dict[str, Place] = {
+            place.name: place for place in map.places.values()
+        }
+
+        self.warehouses = warehouses
+        self.products = set()
+        for x in [w.products.items() for w in warehouses]:
+            self.products.update(set(x))
+
         self.drivers: Dict[int, Driver] = {
             driver.id: driver for driver in drivers.keys()
         }
@@ -91,9 +100,12 @@ time: {h + int(self.clock / 3600)}:{m + int(self.clock / 60) % 12}:{s + self.clo
                 command(*toks[1:])
             except Exception as e:
                 print(e.__class__, e)
+                traceback.print_exc()
+
             print(self)
 
-    def place_order(
+    def place_order_command(
+        self,
         time_limit: int,
     ):
         """_summary_
@@ -101,3 +113,21 @@ time: {h + int(self.clock / 3600)}:{m + int(self.clock / 60) % 12}:{s + self.clo
         Args:
             time_limit (int): tempo limite para o pedido
         """
+        order_place = input("Onde está? ")
+        print(self.places[order_place])
+
+        d = {i: (x, y) for i, (x, y) in enumerate(list(self.products))}
+        print(
+            "\nProdutos: \n", *[f"\t{i}: {x}:{y.weight}\n" for i, (x, y) in d.items()]
+        )
+
+        choices = input(f"O que quer encomendar? [0 .. {len(d)-1}]: ")
+        choice_list = choices.split(" ")
+        choice_number_list = [int(x) for x in choice_list]
+
+        order = Order(
+            self.clock + int(time_limit) * 60,
+            self.places[order_place],
+            {d[i] for i in choice_number_list},
+        )
+        print(order.__dict__)

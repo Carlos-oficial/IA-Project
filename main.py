@@ -20,7 +20,7 @@ dirvers = {
     Driver("Filipe", Bycicle()): random.choice(nodes),
 }
 
-s = Simulation(map, dirvers)
+s = Simulation(map, dirvers, warehouses=s.warehouses)
 s.start()
 
 # map = Map("Gualtar, PT", "file")

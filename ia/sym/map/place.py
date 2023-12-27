@@ -19,7 +19,6 @@ class Place:
         self.name = name
         self.x = x
         self.y = y
-        self.storage: Dict[str, int] = {}
         self.weather: Weather = Weather.randomize()
 
     def __str__(self):
@@ -27,8 +26,7 @@ class Place:
 
     def __repr__(self):
         return f"""{self.name} @ {self.x,self.y}
-weather:{self.weather}
-storage:{self.storage}    
+    weather:{self.weather}
     """
 
     def get_weather(self) -> Weather:
