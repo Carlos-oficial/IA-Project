@@ -4,6 +4,7 @@ import networkx as nx
 import osmnx as ox
 import traceback
 from ia.map.map import Map
+from ia.map.search import *
 from ia.map.weather import Weather
 from ia.orders.products import *
 from ia.drivers.driver import *
@@ -24,7 +25,7 @@ class Simulation:
         NORMAL = "normal"
         HARD = "hard"
 
-    def __init__(self, map: Map, drivers: Dict[Driver, int], warehouses=dict()):
+    def __init__(self, map: Map, drivers: Dict[Driver, int], warehouses: list):
         self.difficulty = None
         self.clock: int = 0
         self.map = map
@@ -32,9 +33,14 @@ class Simulation:
             place.name: place for place in map.places.values()
         }
         self.warehouses = warehouses
+        self.names_warehouses: Dict[str, Warehouse] = {w.name: w for w in warehouses}
+        self.warehouse_points = {
+            self.names_warehouses[name]: node
+            for name, node in map.pickup_points.items()
+        }
         self.products = set()
         self.orders: List[Order] = []
-        for x in [w.products.items() for w in warehouses]:
+        for x in [w.products.values() for w in warehouses]:
             self.products.update(set(x))
 
         self.drivers: Dict[int, Driver] = {
@@ -44,7 +50,7 @@ class Simulation:
         self.drivers_in_transit: Dict[
             int, [Tuple[Tuple[int, int]], float]
         ] = dict()  # id:((from_id,to_id),meters)
-        self.stationary_drivers: Dict[int, int] = drivers  # id:node_id
+        self.available_drivers: Dict[Driver, int] = drivers  # id:node_id
 
     def __str__(self):
         h, m, s = Simulation.start_time
@@ -61,11 +67,80 @@ time: {h + int(self.clock / 3600)}:{m + int(self.clock / 60) % 12}:{s + self.clo
         for order in self.orders:
             path = self.get_order_shortest_path(order)
 
-    def order(self, client_node, products: Dict[Product, int]):
-        end_node = client_node
-        order_weight = sum(p.weight * amm for p, amm in products.items())
-        for d_id, driver in self.drivers.items():
-            pass
+    def approx_path_time(
+        self, veichle: Veichle, maxcargo: float, path: List[int]
+    ) -> float:
+        total_time_seconds = 0.0
+        vel = veichle.calc_max_velocity(cargo=maxcargo)
+        for i in range(len(path) - 1):
+            u, v = path[i], path[i + 1]
+            total_time_seconds += (
+                self.map._edge_length(u, v)
+                * 3.6
+                / min(self.map.roads_mapped[u][v].max_speed(), vel)
+            )
+        return total_time_seconds
+
+    def path_emissions(self, veichle: Veichle, path: List[int]) -> float:
+        return self.map.path_length(path) / 1000 * veichle.emissions
+
+    def mean_speed(self, driver, node1, node2):
+        """
+        mean top speed
+        """
+        min_speed = 50
+        max_speed = 0
+        for road in self.map.roads:
+            min_speed = min(min_speed, road.max_speed())
+            max_speed = max(max_speed, road.max_speed())
+        return (min_speed + max_speed) / 2
+
+    def estimated_time(self, driver: Driver, order: Order, node1: int, node2: int):
+        return (
+            3.6
+            * self.map.distance(node1, node2)
+            * 1.6
+            / driver.veichle.calc_max_velocity(cargo=order.weight())
+        )
+
+    def dispatch_order(self, order: Order):
+        end_node = order.destination
+        end_node = self.map._name_nodes[order.destination.name]
+
+        dispatched_products = set()
+        where_to_get = dict()
+        for w in self.warehouses:
+            can_get = set(order.products.keys()).intersection(set(w.products.values()))
+            dispatched_products = dispatched_products.union(can_get)
+            for item in can_get:
+                where_to_get[item] = w
+        print(where_to_get)
+        order_weight = sum(p.weight * amm for p, amm in order.products.items())
+        for driver, node in self.available_drivers.items():
+            if driver.veichle.weight_cap > order_weight:
+                search = RestrictedTourSearch(
+                    self.map,
+                    self.map.distance,
+                    GreedySearch(
+                        self.map,
+                        h=lambda x, y: self.estimated_time(driver, order, x, y),
+                    ),
+                )
+                warehouse_nodes = {
+                    self.warehouse_points[w] for w in where_to_get.values()
+                }
+                where_to_go = warehouse_nodes.union({end_node})
+                print((node, where_to_go, {end_node: warehouse_nodes}))
+                res = search.run(node, where_to_go, {end_node: warehouse_nodes})
+                print(
+                    f"""
+path: {res.path}
+veichle: {driver.veichle.__class__.__name__} 
+{self.map.path_length(res.path)/1000} km
+{self.path_emissions(driver.veichle,res.path)}g of CO2 
+estimated_time: {int(self.approx_path_time(driver.veichle,order.weight(),res.path)/60)}min
+"""
+                )
 
     def skip(self, ticks: int):
         for i in range(0, ticks):
@@ -80,7 +155,7 @@ time: {h + int(self.clock / 3600)}:{m + int(self.clock / 60) % 12}:{s + self.clo
         fig, ax = self.map.plot(
             show_node_lables=show_lables,
             show=False,
-            highlight=list(self.stationary_drivers.values())
+            highlight=list(self.available_drivers.values())
             + [self.map._name_nodes[order.destination.name] for order in self.orders],
         )
 
@@ -103,7 +178,7 @@ time: {h + int(self.clock / 3600)}:{m + int(self.clock / 60) % 12}:{s + self.clo
             pos=self.map._render_positions,
             labels={
                 node: self.drivers[driver.id].name
-                for driver, node in self.stationary_drivers.items()
+                for driver, node in self.available_drivers.items()
             },
             bbox=dict(facecolor="white", alpha=0.5),
             font_color="r",
@@ -229,11 +304,10 @@ time: {h + int(self.clock / 3600)}:{m + int(self.clock / 60) % 12}:{s + self.clo
             time_limit (int): tempo limite para o pedido
         """
         order_place = input("Onde está? ")
-        print(self.places[order_place])
 
-        d = {i: (x, y) for i, (x, y) in enumerate(list(self.products))}
+        d = {i: product for i, product in enumerate(list(self.products))}
         print(
-            "\nProdutos: \n", *[f"\t{i}: {x}:{y.weight}\n" for i, (x, y) in d.items()]
+            "\nProdutos: \n", *[f"\t{i}: {x.name}:{x.weight}\n" for i, x in d.items()]
         )
 
         choices = input(f"O que quer encomendar? [0 .. {len(d)-1}]: ")
@@ -245,7 +319,9 @@ time: {h + int(self.clock / 3600)}:{m + int(self.clock / 60) % 12}:{s + self.clo
         order = Order(
             self.clock + int(time_limit) * 60,
             self.places[order_place],
-            {d[i] for i in choice_number_list},
+            {d[i]: choice_number_list.count(i) for i in choice_number_list},
         )
+
+        print("it weighs ", order.weight(), " kgs")
         self.orders.append(order)
-        print(order.__dict__)
+        self.dispatch_order(order)

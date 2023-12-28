@@ -1,6 +1,6 @@
 class Veichle:
     def __init__(
-        self, velocity_cap, avg_velocity, weight_cap, vel_decrement, emissions
+        self, velocity_cap, avg_velocity, weight_cap, vel_decrement, emissions: int
     ):
         self.velocity_cap = velocity_cap
         self.avg_velocity = avg_velocity
@@ -12,8 +12,14 @@ class Veichle:
     def cargo_weight(self):
         return 0
 
-    def calc_max_velocity(self):
-        return self.avg_velocity - self.cargo_weight() * self.vel_decrement
+    def calc_max_velocity(self, cargo=None):
+        if cargo:
+            return self.velocity_cap - cargo * self.vel_decrement
+
+    def deliver(self):
+        self.delivered = 2
+
+        return self.velocity_cap - self.cargo_weight() * self.vel_decrement
 
 
 class Car(Veichle):
@@ -24,7 +30,7 @@ class Car(Veichle):
     """
 
     def __init__(self):
-        super().__init__(50, 50, 100, 0.1, 0.251)
+        super().__init__(50, 50, 100, 0.1, 251)
 
 
 class Bike(Veichle):
@@ -34,7 +40,7 @@ class Bike(Veichle):
     """
 
     def __init__(self):
-        super().__init__(35, 35, 20, 0.5, 0.1)
+        super().__init__(35, 35, 20, 0.5, 101)
 
 
 class Bycicle(Veichle):

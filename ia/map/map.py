@@ -237,7 +237,7 @@ class Map(Problem):
     def distance(self, u: int, v: int) -> float:
         ux, uy = self._node_positions[u]
         vx, vy = self._node_positions[v]
-        return ox.distance.euclidean_dist_vec(uy, ux, vy, vx)
+        return ((uy - vy) ** 2 + (ux - vx) ** 2) ** 0.5
 
     def _edge_length(self, u, v) -> float:
         edge_data = self.graph.get_edge_data(u, v)

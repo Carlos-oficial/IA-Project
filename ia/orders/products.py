@@ -95,36 +95,17 @@ class Warehouse:
 
 
 class Order:
-    def __init__(self, time: int, place: Place, products: Set[Product]):
+    def __init__(self, time: int, place: Place, products: Dict[Product, int]):
         self.id = uuid.uuid1()
         self.time: int = time
         self.destination: Place = place
-        self.products = set()
-        self.to_visit_places = set()
-        self.status = 0
+        self.products: Dict[Product, int] = products
+
+    def weight(self):
+        return sum(
+            product.weight * ammount for product, ammount in self.products.items()
+        )
 
     def set_rating(self, rating):
         if not self.delivered:
             self.rating = rating
-
-    def restart_order(self):
-        self.products.clear
-        self.status = 0
-
-    def ask_delivery(self):
-        self.done = 1
-
-    def deliver(self):
-        self.delivered = 2
-
-    def next_status(self, status):
-        if self.status <= 0:
-            self.status = 0
-
-        self.status = self.status + 1
-
-        if self.status >= 2:
-            self.status = 2
-
-    def add_places_to_visit(self, place):
-        self.to_visit_places.add(place)
