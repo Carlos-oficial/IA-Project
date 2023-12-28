@@ -2,7 +2,7 @@ import json
 import uuid
 from typing import Any, Dict, List, Set
 
-from ia.sym.map.place import Place
+from ia.map.place import Place
 
 
 class Product:

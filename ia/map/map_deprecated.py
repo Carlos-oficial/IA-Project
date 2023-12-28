@@ -5,8 +5,8 @@ from typing import Dict, List, Set
 
 import networkx as nx
 
-from ia.sym.map.place import Place
-from ia.sym.map.road import Road
+from ia.map.place import Place
+from ia.map.road import Road
 from ia.ui.map_generator import MapGenerator, MapGeneratorState
 
 

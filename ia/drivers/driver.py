@@ -1,8 +1,8 @@
 from typing import *
 import uuid
-from ia.sym.drivers.veichle import Veichle
-from ia.sym.map.place import Place
-from ia.sym.orders.products import *
+from ia.drivers.veichle import Veichle
+from ia.map.place import Place
+from ia.orders.products import *
 
 
 class Driver:

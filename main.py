@@ -1,12 +1,12 @@
 import matplotlib.pyplot as plt
 import osmnx as ox
 
-from ia.sym.map.map import Map
-from ia.sym.drivers.driver import Driver
-from ia.sym.drivers.veichle import *
-from ia.sym.map.search import *
-from ia.sym.sym import Simulation
-from ia.sym.ui.map_generator import MapGenerator, MapGeneratorState
+from ia.map.map import Map
+from ia.drivers.driver import Driver
+from ia.drivers.veichle import *
+from ia.map.search import *
+from ia.sym import Simulation
+from ia.ui.map_generator import MapGenerator, MapGeneratorState
 
 s = MapGeneratorState.load_from_file("Gualtar")
 # s = MapGenerator.run()

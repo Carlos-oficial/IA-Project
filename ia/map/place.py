@@ -1,6 +1,6 @@
 from typing import Dict
 
-from ia.sym.map.weather import Weather
+from ia.map.weather import Weather
 
 
 class Place:

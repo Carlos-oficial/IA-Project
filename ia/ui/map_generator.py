@@ -17,7 +17,7 @@ from PIL import Image, ImageTk
 from scipy.spatial import cKDTree
 from sklearn.cluster import KMeans
 
-from ia.sym.orders.products import Product, Warehouse
+from ia.orders.products import Product, Warehouse
 
 
 def hilbert_curve(width, height, num_points):

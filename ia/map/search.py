@@ -7,7 +7,7 @@ import networkx as nx
 import osmnx as ox
 from geopy.distance import geodesic
 
-from ia.sym.map.map import Map
+from ia.map.map import Map
 
 
 class SearchResult:
@@ -328,10 +328,6 @@ class RestrictedTourSearch(Search):
             self.alg.reset()
             route += r.path[1:]
             curr_node = next
-
-        r = self.alg.run(curr_node, src)
-
-        route += r.path[1:]
         return SearchResultOnMap(
             route,
             pseudo_route=self.pseudo_route,

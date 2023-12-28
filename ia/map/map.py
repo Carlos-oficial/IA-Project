@@ -7,9 +7,9 @@ import networkx as nx
 import osmnx as ox
 from geopy.distance import geodesic
 
-from ia.sym.map.place import Place
-from ia.sym.map.road import Road
-from ia.sym.ui.map_generator import MapGeneratorState
+from ia.map.place import Place
+from ia.map.road import Road
+from ia.ui.map_generator import MapGeneratorState
 
 
 class Problem:
