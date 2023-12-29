@@ -1,19 +1,19 @@
 import time
+import traceback
+from enum import Enum
+from typing import *
+
+import geopandas as gpd
 import matplotlib.pyplot as plt
 import networkx as nx
+import numpy as np
 import osmnx as ox
-import traceback
+
+from ia.drivers.driver import *
 from ia.map.map import Map
 from ia.map.search import *
 from ia.map.weather import Weather
 from ia.orders.products import *
-from ia.drivers.driver import *
-import numpy as np
-from typing import *
-import osmnx as ox
-import geopandas as gpd
-
-from enum import Enum
 
 
 class Simulation:
@@ -39,7 +39,8 @@ class Simulation:
             for name, node in map.pickup_points.items()
         }
         self.products = set()
-        self.orders: List[Order] = []
+        self.pending_orders: List[Order] = []
+        self.orders_in_progress: List[Order] = []
         for x in [w.products.values() for w in warehouses]:
             self.products.update(set(x))
 
@@ -54,18 +55,31 @@ class Simulation:
 
     def __str__(self):
         h, m, s = Simulation.start_time
-        return f"""
-time: {h + int(self.clock / 3600)}:{m + int(self.clock / 60) % 12}:{s + self.clock % 60}
-              """
+        return f"time: {h + int(self.clock / 3600)}:{m + int(self.clock / 60) % 12}:{s + self.clock % 60}"
 
     def __repr__(self):
         return self.__str__()
 
     def tick(self, n=1):
         self.clock += int(n)
-        self.randomize_update_traffic()
-        for order in self.orders:
-            path = self.get_order_shortest_path(order)
+        self.pending_orders = sorted(self.pending_orders, key=lambda x: x.time_limit)
+        for order in self.pending_orders:
+            try:
+                self.dispatch_order(order)
+            except Exception as e:
+                pass
+            else:
+                self.pending_orders.remove(order)
+                self.orders_in_progress.append(order)
+
+        for driver in self.drivers.values():
+            self.update_driver(driver, time_passed=n)
+
+    def orders_command(self):
+        print("pending")
+        print(*self.pending_orders)
+        print("in progress")
+        print(*self.orders_in_progress)
 
     def approx_path_time(
         self, veichle: Veichle, maxcargo: float, path: List[int]
@@ -114,10 +128,12 @@ time: {h + int(self.clock / 3600)}:{m + int(self.clock / 60) % 12}:{s + self.clo
             dispatched_products = dispatched_products.union(can_get)
             for item in can_get:
                 where_to_get[item] = w
-        print(where_to_get)
+        print("where_to_get:", where_to_get)
         order_weight = sum(p.weight * amm for p, amm in order.products.items())
+        driver_emissions: Dict[Driver, float] = dict()
+        driver_search_result: Dict[Driver, SearchResult] = dict()
         for driver, node in self.available_drivers.items():
-            if driver.veichle.weight_cap > order_weight:
+            if driver.veichle.weight_cap >= order_weight:
                 search = RestrictedTourSearch(
                     self.map,
                     self.map.distance,
@@ -132,18 +148,35 @@ time: {h + int(self.clock / 3600)}:{m + int(self.clock / 60) % 12}:{s + self.clo
                 where_to_go = warehouse_nodes.union({end_node})
                 print((node, where_to_go, {end_node: warehouse_nodes}))
                 res = search.run(node, where_to_go, {end_node: warehouse_nodes})
+                driver_emissions[driver] = self.path_emissions(driver.veichle, res.path)
+                driver_search_result[driver] = res
                 print(
                     f"""
-path: {res.path}
-veichle: {driver.veichle.__class__.__name__} 
-{self.map.path_length(res.path)/1000} km
-{self.path_emissions(driver.veichle,res.path)}g of CO2 
-estimated_time: {int(self.approx_path_time(driver.veichle,order.weight(),res.path)/60)}min
-"""
+            path: {res.path}
+            veichle: {driver.veichle.__class__.__name__} 
+            {self.map.path_length(res.path)/1000} km
+            {self.path_emissions(driver.veichle,res.path)}g of CO2 
+            estimated_time: {int(self.approx_path_time(driver.veichle,order.weight(),res.path)/60)}:{int(self.approx_path_time(driver.veichle,order.weight(),res.path))%60}
+            """
                 )
+        drivers = list(driver_emissions.keys())
+        sorted(drivers, key=lambda x: driver_emissions[x])
+        if len(drivers) == 0:
+            raise Exception("No available driver")
+        self.send_driver(drivers[0], res)
+        print("picked", drivers[0].name)
+
+    def send_driver(self, driver: Driver, res: SearchResult):
+        d_node = self.available_drivers[driver]
+        self.available_drivers.pop(driver)
+        self.drivers_in_transit[driver] = (self.map._node_positions[d_node], 0.0)
+        print(driver, " goin")
+
+    def update_driver(self, driver: Driver, time_passed: int = 1):
+        pass
 
     def skip(self, ticks: int):
-        for i in range(0, ticks):
+        for i in range(0, int(ticks)):
             self.tick()
 
     def plot_command(self, *args):
@@ -156,22 +189,24 @@ estimated_time: {int(self.approx_path_time(driver.veichle,order.weight(),res.pat
             show_node_lables=show_lables,
             show=False,
             highlight=list(self.available_drivers.values())
-            + [self.map._name_nodes[order.destination.name] for order in self.orders],
+            + [
+                self.map._name_nodes[order.destination.name]
+                for order in self.pending_orders
+            ],
         )
 
-        midpoints = {
-            (u, v): (
-                (self.map._render_positions[u][0] + self.map._render_positions[v][0])
-                / 2,
-                (self.map._render_positions[u][1] + self.map._render_positions[v][1])
-                / 2,
-            )
-            for (u, v), _ in self.drivers_in_transit.values()
-        }
+        # midpoints = {
+        #     (u, v): (
+        #         (self.map._render_positions[u][0] + self.map._render_positions[v][0])
+        #         / 2,
+        #         (self.map._render_positions[u][1] + self.map._render_positions[v][1])
+        #         / 2,
+        #     )
+        #     for (u, v), _ in self.drivers_in_transit.values()
+        # }
 
-        for x, y in midpoints.values():
-            # print(x,y)
-            plt.scatter(x, y, color="blue", marker="o", s=10)
+        # for x, y in midpoints.values():
+        #     plt.scatter(x, y, color="blue", marker="o", s=10)
 
         nx.draw_networkx_labels(
             self.map.graph,
@@ -193,11 +228,26 @@ estimated_time: {int(self.approx_path_time(driver.veichle,order.weight(),res.pat
             self.map.graph,
             pos=self.map._render_positions,
             labels={
-                self.map._name_nodes[order.destination.name]: "order"
-                for order in self.orders
+                self.map._name_nodes[order.destination.name]: f"order{order.id}"
+                for order in self.pending_orders
             },
             bbox=dict(facecolor="white", alpha=0.5),
             font_color="r",
+            font_size=10,
+            horizontalalignment="right",
+            verticalalignment="bottom",
+            ax=ax,
+        )
+
+        nx.draw_networkx_labels(
+            self.map.graph,
+            pos=self.map._render_positions,
+            labels={
+                self.map._name_nodes[order.destination.name]: f"order{order.id}"
+                for order in self.orders_in_progress
+            },
+            bbox=dict(facecolor="white", alpha=0.5),
+            font_color="y",
             font_size=10,
             horizontalalignment="right",
             verticalalignment="bottom",
@@ -279,9 +329,10 @@ estimated_time: {int(self.approx_path_time(driver.veichle,order.weight(),res.pat
 
     def ui(self):
         commands = {
-            "tick": self.tick,
+            "tick": self.skip,
             "plot": self.plot_command,
             "order": self.place_order_command,
+            "orders": self.orders_command,
         }
         while True:
             try:
@@ -323,5 +374,4 @@ estimated_time: {int(self.approx_path_time(driver.veichle,order.weight(),res.pat
         )
 
         print("it weighs ", order.weight(), " kgs")
-        self.orders.append(order)
-        self.dispatch_order(order)
+        self.pending_orders.append(order)

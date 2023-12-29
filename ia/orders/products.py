@@ -2,6 +2,7 @@ import json
 import uuid
 from typing import Any, Dict, List, Set
 
+import ia
 from ia.map.place import Place
 
 
@@ -15,6 +16,9 @@ class Product:
             Product.names[name] = self
         else:
             self = Product.names[name]
+
+    def __repr__(self):
+        return self.name + str(self.weight) + "kg"
 
     @staticmethod
     def new(name: str, weight: float):
@@ -95,9 +99,12 @@ class Warehouse:
 
 
 class Order:
+    _id = 0
+
     def __init__(self, time: int, place: Place, products: Dict[Product, int]):
-        self.id = uuid.uuid1()
-        self.time: int = time
+        self.id = Order._id
+        Order._id += 1
+        self.time_limit: int = time
         self.destination: Place = place
         self.products: Dict[Product, int] = products
 
@@ -109,3 +116,15 @@ class Order:
     def set_rating(self, rating):
         if not self.delivered:
             self.rating = rating
+
+    def __repr__(self):
+        h, m, s = ia.START_TIME
+        return f"""
+order n{self.id}
+destination: {self.destination.name} @ {(self.destination.x,self.destination.y)}
+products: {self.products}
+time limit: {h + int(self.time_limit / 3600)}:{m + int(self.time_limit / 60) % 12}:{s + self.time_limit % 60}
+    """
+
+        return f"""
+              """

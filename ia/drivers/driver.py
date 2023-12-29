@@ -1,5 +1,6 @@
-from typing import *
 import uuid
+from typing import *
+
 from ia.drivers.veichle import Veichle
 from ia.map.place import Place
 from ia.orders.products import *

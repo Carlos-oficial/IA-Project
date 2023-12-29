@@ -266,6 +266,13 @@ class Map(Problem):
         except Exception as e:
             raise ValueError("Road was not found")
 
+    def central_node(self) -> int:
+        # Calculate closeness centrality
+        closeness_centrality = nx.closeness_centrality(self.graph)
+
+        # Find the node with the highest closeness centrality
+        return max(closeness_centrality, key=closeness_centrality.get)
+
     def neighbours(self, node):
         cached = self._neighbours.get(node)
         if cached is not None:

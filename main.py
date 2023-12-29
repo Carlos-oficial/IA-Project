@@ -1,23 +1,24 @@
 import matplotlib.pyplot as plt
 import osmnx as ox
 
-from ia.map.map import Map
 from ia.drivers.driver import Driver
 from ia.drivers.veichle import *
+from ia.map.map import Map
 from ia.map.search import *
 from ia.sym import Simulation
 from ia.ui.map_generator import MapGenerator, MapGeneratorState
 
-s = MapGeneratorState.load_from_file("Gualtar")
 # s = MapGenerator.run()
+s = MapGeneratorState.load_from_file("Gualtar")
 map = Map.from_map_gen_state(s)
-nodes = list(map.graph.nodes)
+
+center = map.central_node()
 
 dirvers = {
-    Driver("Júlio", Bike()): random.choice(nodes),
-    Driver("Carlos", Bike()): random.choice(nodes),
-    Driver("Gerson", Car()): random.choice(nodes),
-    Driver("Filipe", Bycicle()): random.choice(nodes),
+    Driver("Júlio", Bike()): center,
+    Driver("Carlos", Bike()): center,
+    Driver("Gerson", Car()): center,
+    Driver("Filipe", Bycicle()): center,
 }
 
 
@@ -28,7 +29,6 @@ s.start()
 # map.fetch_map()
 # map.proportion = get_proportion(map, map.distance, n=5000)
 # print("Proportion is", map.proportion)
-#
 
 
 # AA = map.get_node_by_name("AA")
@@ -38,7 +38,9 @@ s.start()
 # HI = map.get_node_by_name("HI")
 
 
-# alg = AStar(map, map.distance)
+# alg = GreedySearch(map, map.distance)
+# res = alg.run(GG, AA)
+# res.plot()
 # route_alg = RestrictedTourSearch(map, map.distance, alg)
 # res = route_alg.run(AA, set([GG, AJ, GA, HI]), {GG: {AJ, GA}})
 # print(res)
@@ -46,4 +48,4 @@ s.start()
 
 # map.plot(highlight=set([AA, GG, AJ, GA, HI]))
 
-# AA AJ GA GG HI
+# # AA AJ GA GG HI
