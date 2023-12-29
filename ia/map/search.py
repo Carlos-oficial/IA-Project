@@ -29,6 +29,7 @@ class SearchResultOnMap(SearchResult):
         self.search_tree: Dict[int, int] = search_tree
         self.explored: Set[int] = explored
         self.nodes_to_highlight = nodes_to_highlight
+        self.pseudo_route = kwargs.get("pseudo_route")
         self.passed_kwargs = kwargs
 
     def __repr__(self):

@@ -15,10 +15,10 @@ map = Map.from_map_gen_state(s)
 center = map.central_node()
 
 dirvers = {
-    Driver("Júlio", Bike()): center,
-    Driver("Carlos", Bike()): center,
-    Driver("Gerson", Car()): center,
-    Driver("Filipe", Bycicle()): center,
+    Driver("Júlio", Bike(), map): center,
+    Driver("Carlos", Bike(), map): center,
+    Driver("Gerson", Car(), map): center,
+    Driver("Filipe", Bycicle(), map): center,
 }
 
 

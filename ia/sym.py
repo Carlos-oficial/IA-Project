@@ -47,10 +47,7 @@ class Simulation:
         self.drivers: Dict[int, Driver] = {
             driver.id: driver for driver in drivers.keys()
         }
-        self.drivers_pos: Dict[int, Tuple[int, int]] = dict()
-        self.drivers_in_transit: Dict[
-            int, [Tuple[Tuple[int, int]], float]
-        ] = dict()  # id:((from_id,to_id),meters)
+        self.drivers_in_transit: List[Driver] = list()  # id:((from_id,to_id),meters)
         self.available_drivers: Dict[Driver, int] = drivers  # id:node_id
 
     def __str__(self):
@@ -72,8 +69,20 @@ class Simulation:
                 self.pending_orders.remove(order)
                 self.orders_in_progress.append(order)
 
-        for driver in self.drivers.values():
+        for driver in self.drivers_in_transit:
             self.update_driver(driver, time_passed=n)
+
+    def update_driver(self, driver: Driver, time_passed: int = 1):
+        if driver.advance(seconds=time_passed):
+            self.drivers_in_transit.remove(driver)
+            self.available_drivers.append(driver)
+            self.orders_in_progress.remove(driver.curr_order)
+            # self.handle_order_delivered(driver,order)
+            self.drivers
+
+    def skip(self, ticks: int):
+        for i in range(0, int(ticks)):
+            self.tick()
 
     def orders_command(self):
         print("pending")
@@ -152,6 +161,7 @@ class Simulation:
                 driver_search_result[driver] = res
                 print(
                     f"""
+            driver:{driver.name}
             path: {res.path}
             veichle: {driver.veichle.__class__.__name__} 
             {self.map.path_length(res.path)/1000} km
@@ -163,21 +173,52 @@ class Simulation:
         sorted(drivers, key=lambda x: driver_emissions[x])
         if len(drivers) == 0:
             raise Exception("No available driver")
-        self.send_driver(drivers[0], res)
+        self.send_driver(order, drivers[0], res)
         print("picked", drivers[0].name)
 
-    def send_driver(self, driver: Driver, res: SearchResult):
+    def place_order_command(
+        self,
+    ):
+        """_summary_
+
+        Args:
+            time_limit (int): tempo limite para o pedido
+        """
+        order_place = input("Onde está? ")
+
+        d = {i: product for i, product in enumerate(list(self.products))}
+        print(
+            "\nProdutos: \n", *[f"\t{i}: {x.name}:{x.weight}\n" for i, x in d.items()]
+        )
+
+        choices = input(f"O que quer encomendar? [0 .. {len(d)-1}]: ")
+        choice_list = choices.split(" ")
+        choice_number_list = [int(x) for x in choice_list]
+
+        time_limit = input("em quantos minutos? ")
+
+        order = Order(
+            self.clock + int(time_limit) * 60,
+            self.places[order_place],
+            {d[i]: choice_number_list.count(i) for i in choice_number_list},
+        )
+
+        print("it weighs ", order.weight(), " kgs")
+        self.pending_orders.append(order)
+
+    def send_driver(self, order, driver: Driver, res: SearchResultOnMap):
         d_node = self.available_drivers[driver]
         self.available_drivers.pop(driver)
-        self.drivers_in_transit[driver] = (self.map._node_positions[d_node], 0.0)
+        self.drivers_in_transit.append(driver)
+        driver.set_pseudo_route(res.pseudo_route)
+        driver.set_path(res.path)
+        driver.order = order
         print(driver, " goin")
 
-    def update_driver(self, driver: Driver, time_passed: int = 1):
-        pass
-
-    def skip(self, ticks: int):
-        for i in range(0, int(ticks)):
-            self.tick()
+    def drivers_command(self):
+        print("drivers in transit")
+        for driver in self.drivers_in_transit:
+            print(driver)
 
     def plot_command(self, *args):
         lables = len(set(args).intersection("l", "lables"))
@@ -194,19 +235,6 @@ class Simulation:
                 for order in self.pending_orders
             ],
         )
-
-        # midpoints = {
-        #     (u, v): (
-        #         (self.map._render_positions[u][0] + self.map._render_positions[v][0])
-        #         / 2,
-        #         (self.map._render_positions[u][1] + self.map._render_positions[v][1])
-        #         / 2,
-        #     )
-        #     for (u, v), _ in self.drivers_in_transit.values()
-        # }
-
-        # for x, y in midpoints.values():
-        #     plt.scatter(x, y, color="blue", marker="o", s=10)
 
         nx.draw_networkx_labels(
             self.map.graph,
@@ -295,6 +323,21 @@ class Simulation:
                 ax=ax,
             )
 
+        edge_labels = {
+            driver.curr_edge: driver.name + "{:.2f}m".format(driver.progress_along_edge)
+            for driver in self.drivers_in_transit
+        }
+
+        nx.draw_networkx_edge_labels(
+            self.map.graph,
+            self.map._render_positions,
+            edge_labels=edge_labels,
+            font_color="w",
+            font_size=8,
+            bbox=dict(facecolor="red", alpha=0.1),
+            ax=ax,
+        )
+
         fig, ax = ox.plot_graph(
             self.map.graph,
             node_size=0,
@@ -333,6 +376,7 @@ class Simulation:
             "plot": self.plot_command,
             "order": self.place_order_command,
             "orders": self.orders_command,
+            "drivers": self.drivers_command,
         }
         while True:
             try:
@@ -345,33 +389,3 @@ class Simulation:
                 traceback.print_exc()
 
             print(self)
-
-    def place_order_command(
-        self,
-    ):
-        """_summary_
-
-        Args:
-            time_limit (int): tempo limite para o pedido
-        """
-        order_place = input("Onde está? ")
-
-        d = {i: product for i, product in enumerate(list(self.products))}
-        print(
-            "\nProdutos: \n", *[f"\t{i}: {x.name}:{x.weight}\n" for i, x in d.items()]
-        )
-
-        choices = input(f"O que quer encomendar? [0 .. {len(d)-1}]: ")
-        choice_list = choices.split(" ")
-        choice_number_list = [int(x) for x in choice_list]
-
-        time_limit = input("em quantos minutos? ")
-
-        order = Order(
-            self.clock + int(time_limit) * 60,
-            self.places[order_place],
-            {d[i]: choice_number_list.count(i) for i in choice_number_list},
-        )
-
-        print("it weighs ", order.weight(), " kgs")
-        self.pending_orders.append(order)

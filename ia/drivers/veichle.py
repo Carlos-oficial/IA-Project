@@ -6,20 +6,10 @@ class Veichle:
         self.avg_velocity = avg_velocity
         self.weight_cap = weight_cap
         self.vel_decrement = vel_decrement
-        self.cargo: Dict[Product, int] = dict({})  # Mapeia produtos e quantidades
         self.emissions = emissions
 
-    def cargo_weight(self):
-        return 0
-
-    def calc_max_velocity(self, cargo=None):
-        if cargo:
-            return self.velocity_cap - cargo * self.vel_decrement
-
-    def deliver(self):
-        self.delivered = 2
-
-        return self.velocity_cap - self.cargo_weight() * self.vel_decrement
+    def calc_max_velocity(self, cargo: float = 0):
+        return self.velocity_cap - cargo * self.vel_decrement
 
 
 class Car(Veichle):

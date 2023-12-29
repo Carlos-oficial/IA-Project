@@ -215,14 +215,16 @@ class Map(Problem):
 
     def add_road(self, place1: Place, place2: Place, length):
         road = Road(place1, place2, length)
+        road2 = Road(place2, place1, length)
         self.roads.add(road)
+        self.roads.add(road2)
         if self.roads_mapped.get(place1.id) is None:
             self.roads_mapped[place1.id] = dict()
 
         if self.roads_mapped.get(place2.id) is None:
             self.roads_mapped[place2.id] = dict()
         self.roads_mapped[place1.id][place2.id] = road
-        self.roads_mapped[place2.id][place1.id] = road
+        self.roads_mapped[place2.id][place1.id] = road2
 
     def get_node_by_name(self, name):
         if self._name_nodes.get(name) is not None:
