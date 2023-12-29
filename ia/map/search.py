@@ -44,7 +44,7 @@ class SearchResultOnMap(SearchResult):
 
         return tree_edges
 
-    def plot(self, color="red"):
+    def plot(self, color="red", show=True):
         nc = [
             "r" if node in self.path else "g" if node in self.explored else "w"
             for node in self.map.graph.nodes
@@ -95,8 +95,9 @@ class SearchResultOnMap(SearchResult):
         ax.set_title(
             f"searched from {self.map._node_names[start]} to {self.map._node_names[end]}"
         )
-
-        plt.show()
+        if show:
+            plt.show()
+        return fig, ax
 
 
 class Search:

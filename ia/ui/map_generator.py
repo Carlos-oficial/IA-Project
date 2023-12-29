@@ -391,3 +391,7 @@ class MapGenerator:
         app = MapGenerator(root)
         root.mainloop()
         return app.state
+
+
+if __name__ == "__main__":
+    print("HI!!!!")

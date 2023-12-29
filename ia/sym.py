@@ -75,7 +75,7 @@ class Simulation:
     def update_driver(self, driver: Driver, time_passed: int = 1):
         if driver.advance(seconds=time_passed):
             self.drivers_in_transit.remove(driver)
-            self.available_drivers.append(driver)
+            self.available_drivers[driver] = driver.curr_edge[1]
             self.orders_in_progress.remove(driver.curr_order)
             # self.handle_order_delivered(driver,order)
             self.drivers
@@ -212,13 +212,38 @@ class Simulation:
         self.drivers_in_transit.append(driver)
         driver.set_pseudo_route(res.pseudo_route)
         driver.set_path(res.path)
-        driver.order = order
+        driver.curr_order = order
+        driver.warehouses = self.warehouse_points
+        driver.last_search = res
         print(driver, " goin")
 
     def drivers_command(self):
         print("drivers in transit")
         for driver in self.drivers_in_transit:
             print(driver)
+
+    def plot_driver_command(self):
+        for driver in self.drivers_in_transit:
+            print(driver.name, " : ", driver.id)
+            print(driver)
+
+        driver_id = input("qual id? ")
+        d: Driver = self.drivers[int(driver_id)]
+        search: SearchResultOnMap = d.last_search
+        fig, ax = search.plot(show=False)
+
+        edge_labels = {d.curr_edge: d.name + "{:.2f}m".format(d.progress_along_edge)}
+
+        nx.draw_networkx_edge_labels(
+            self.map.graph,
+            self.map._render_positions,
+            edge_labels=edge_labels,
+            font_color="w",
+            font_size=8,
+            bbox=dict(facecolor="red", alpha=0.1),
+            ax=ax,
+        )
+        plt.show()
 
     def plot_command(self, *args):
         lables = len(set(args).intersection("l", "lables"))
@@ -377,6 +402,7 @@ class Simulation:
             "order": self.place_order_command,
             "orders": self.orders_command,
             "drivers": self.drivers_command,
+            "driver_plot": self.plot_driver_command,
         }
         while True:
             try:

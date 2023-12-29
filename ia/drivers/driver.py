@@ -21,21 +21,23 @@ class Driver:
         self.curr_edge: Tuple[int, int] = None  # (u,v)
         self.curr_road: Road = None
         self.curr_order: Order = None
+        self.warehouses: Dict[Warehouse, int] = None
         self.progress_along_edge: float = 0.0
         self.cargo: {Product: int} = dict()
         self.veichle: Veichle = veichle
         self.ratings: List[float] = 0
         self.going_path = list()
+        self.last_search = None
         self.current: Order = None
 
     def __repr__(self):
         return (
-            f"Driver(id={self.id}, name={self.name}, "
-            f"vehicle={self.veichle}, ratings={self.ratings}, "
-            f"current_road={self.curr_road}, location={self.curr_edge}"
-            + f" aka {self.map._node_names[self.curr_edge[0]],self.map._node_names[self.curr_edge[1]]})"
+            f"Driver(id={self.id}, name={self.name},\n "
+            f"vehicle={self.veichle}, ratings={self.ratings},\n "
+            f"current_road={self.curr_road}, location={self.curr_edge}, progress={self.progress_along_edge}, \n"
+            + f" aka {self.map._node_names[self.curr_edge[0]],self.map._node_names[self.curr_edge[1]]})\n\n"
             if self.curr_edge is not None
-            else ""
+            else "\n\n"
         )
 
     def add_cargo(cargo: Dict[Product, int]):
@@ -63,7 +65,7 @@ class Driver:
             cargo=sum(self.cargo.values())
         )
         speed = min(road_max_speed, veichle_max_speed)
-        distance = 3.6 * speed
+        distance = speed / 3.6
         self.progress_along_edge += distance
         road_len = self.curr_road.length
         if self.progress_along_edge >= road_len:
@@ -71,21 +73,30 @@ class Driver:
             node = self.to_go.pop(0)
             if node == self.pseudo_route[0]:
                 self.pseudo_route.pop(0)
-                w: Warehouse = {
+                w = {
                     node: warehouse
                     for warehouse, node in self.map.pickup_points.items()
                 }.get(node)
+                w = {
+                    node: warehouse for warehouse, node in self.warehouses.items()
+                }.get(node)
                 if w:  # at a warehouse
-                    for product, ammount in self.curr_order.products.items():
+                    keys_to_remove = []
+
+                    for product, amount in self.curr_order.products.items():
                         if product in w.products.values():
-                            self.cargo[product] = ammount
-                            self.curr_order.products.pop(product)
-            if not self.to_go:
-                True
+                            self.cargo[product] = amount
+                            keys_to_remove.append(product)
+
+                    # Remove the keys after the iteration
+                    for key in keys_to_remove:
+                        self.curr_order.products.pop(key)
+
+            if len(self.to_go) <= 1:
+                return True
             u, v = self.to_go[0], self.to_go[1]
             self.curr_road = self.map.roads_mapped[u][v]
             self.curr_edge = u, v
-            self.progress_along_edge -= road_len
         return False
 
     def add_rating(self, rating):
