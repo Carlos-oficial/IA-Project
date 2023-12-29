@@ -375,6 +375,25 @@ class Simulation:
         ax.set_title(self)
         plt.show()
 
+
+    def help(self):
+        descp = { 
+            "tick - Advances N ticks in time, by default advances one",
+            "plot - Shows the map (nodes, drivers, warehouses, etc)",
+            "order - Adds an order to the sistem",
+            "orders - Shows the orders in the sistem",
+            "drivers - Shows the drivers in the sistem",
+            "driver_plot - Shows the path of the last search of a driver",
+            "help - Shows all commands",
+            "quit - Exit"
+
+        }
+        for c in descp:
+            print(c)
+
+    def quit(self):
+        print("Exiting sistem ...")
+
     def start(self):
         difficulty = input("difficulty 0|1|2: ")
         match (difficulty):
@@ -396,13 +415,15 @@ class Simulation:
         self.ui()
 
     def ui(self):
-        commands = {
+        commands = { 
             "tick": self.skip,
             "plot": self.plot_command,
             "order": self.place_order_command,
             "orders": self.orders_command,
             "drivers": self.drivers_command,
             "driver_plot": self.plot_driver_command,
+            "help": self.help,
+            "quit": self.quit
         }
         while True:
             try:
@@ -410,6 +431,8 @@ class Simulation:
                 toks = command.split(" ")
                 command = commands[toks[0]]
                 command(*toks[1:])
+                if toks[0] == "quit":
+                    return
             except Exception as e:
                 print(e.__class__, e)
                 traceback.print_exc()
