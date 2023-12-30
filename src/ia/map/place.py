@@ -26,7 +26,7 @@ class Place:
 
     def __repr__(self):
         return f"""{self.name} @ {self.x,self.y}
-    weather:{self.weather}
+weather:{self.weather}
     """
 
     def get_weather(self) -> Weather:

@@ -137,13 +137,13 @@ class Simulation:
             dispatched_products = dispatched_products.union(can_get)
             for item in can_get:
                 where_to_get[item] = w
-        print("where_to_get:", where_to_get)
+        # print("where_to_get:", where_to_get)
         order_weight = sum(p.weight * amm for p, amm in order.products.items())
         driver_emissions: Dict[Driver, float] = dict()
         driver_search_result: Dict[Driver, SearchResult] = dict()
         for driver, node in self.available_drivers.items():
             if driver.veichle.weight_cap >= order_weight:
-                search = RestrictedTourSearch(
+                search = AndOrRestrictedTourSearch(
                     self.map,
                     self.map.distance,
                     GreedySearch(
@@ -375,9 +375,8 @@ class Simulation:
         ax.set_title(self)
         plt.show()
 
-
     def help(self):
-        descp = { 
+        descp = {
             "tick - Advances N ticks in time, by default advances one",
             "plot - Shows the map (nodes, drivers, warehouses, etc)",
             "order - Adds an order to the sistem",
@@ -385,8 +384,7 @@ class Simulation:
             "drivers - Shows the drivers in the sistem",
             "driver_plot - Shows the path of the last search of a driver",
             "help - Shows all commands",
-            "quit - Exit"
-
+            "quit - Exit",
         }
         for c in descp:
             print(c)
@@ -415,7 +413,7 @@ class Simulation:
         self.ui()
 
     def ui(self):
-        commands = { 
+        commands = {
             "tick": self.skip,
             "plot": self.plot_command,
             "order": self.place_order_command,
@@ -423,7 +421,7 @@ class Simulation:
             "drivers": self.drivers_command,
             "driver_plot": self.plot_driver_command,
             "help": self.help,
-            "quit": self.quit
+            "quit": self.quit,
         }
         while True:
             try:

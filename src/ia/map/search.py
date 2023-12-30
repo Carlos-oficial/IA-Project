@@ -35,6 +35,13 @@ class SearchResultOnMap(SearchResult):
     def __repr__(self):
         return f"SearchResult(path={self.path}\n search_tree={self.search_tree}\n explored={self.explored},kwargs={self.passed_kwargs})"
 
+    def condense(self, path_cost):
+        return {
+            "path_n": len(self.path),
+            "path_cost": path_cost(self.path),
+            "explored_n": len(self.explored),
+        }
+
     def get_tree_edges(self) -> Set[Tuple[int, int]]:
         tree_edges = set()
 
@@ -46,7 +53,13 @@ class SearchResultOnMap(SearchResult):
 
     def plot(self, color="red", show=True):
         nc = [
-            "r" if node in self.path else "g" if node in self.explored else "w"
+            "#FFFF00"
+            if node in self.pseudo_route
+            else "r"
+            if node in self.path
+            else "g"
+            if node in self.explored
+            else "w"
             for node in self.map.graph.nodes
         ]
         route_edges = set(zip(self.path[1:], self.path))
@@ -63,7 +76,7 @@ class SearchResultOnMap(SearchResult):
 
         fig, ax = ox.plot_graph(
             self.map.graph,
-            node_size=0,
+            node_size=10,
             node_color=nc,
             edge_color=edge_colors,
             edge_alpha=0.6,
@@ -74,7 +87,11 @@ class SearchResultOnMap(SearchResult):
         nx.draw_networkx_labels(
             self.map.graph,
             pos=self.map._render_positions,
-            labels=self.map._node_names,
+            labels={
+                node: name
+                for node, name in self.map._node_names.items()
+                if node in self.path
+            },
             font_color="w",
             font_size=10,
             font_weight="light",
@@ -83,12 +100,12 @@ class SearchResultOnMap(SearchResult):
             ax=ax,
         )
 
-        for node, (x, y) in [
-            (node, (x, y))
-            for (node, (x, y)) in self.map._render_positions.items()
-            if node in self.nodes_to_highlight
-        ]:
-            plt.scatter(x, y, color="blue", marker="o", s=30)
+        # for node, (x, y) in [
+        #     (node, (x, y))
+        #     for (node, (x, y)) in self.map._render_positions.items()
+        #     if node in self.nodes_to_highlight
+        # ]:
+        #     plt.scatter(x, y, color="blue", marker="o", s=30)
 
         start = self.path[0]
         end = self.path[-1]
@@ -103,6 +120,9 @@ class SearchResultOnMap(SearchResult):
 class Search:
     def run() -> SearchResult:
         pass
+
+    def __str__(self):
+        return self.__class__.__name__
 
 
 class ClassicalSearch(Search):
@@ -125,6 +145,8 @@ class ClassicalSearch(Search):
 
 
 class UninformedSearch(ClassicalSearch):
+    OPTIMAL = True
+
     def __init__(self, map, pop_index, cost_function=None):
         super().__init__(map, cost_function=cost_function)
         self.pop_index: int = pop_index
@@ -166,11 +188,15 @@ class UninformedSearch(ClassicalSearch):
 
 
 class DFS(UninformedSearch):
+    OPTIMAL = False
+
     def __init__(self, map):
         super().__init__(map, -1)
 
 
 class BFS(UninformedSearch):
+    OPTIMAL = False
+
     def __init__(self, map):
         super().__init__(map, 0)
 
@@ -178,8 +204,8 @@ class BFS(UninformedSearch):
 class BestFirstSearch(ClassicalSearch):
     def __init__(self, map, h, f, cost_function=None):
         super().__init__(map, cost_function)
-        self.h = h
-        self.f = f
+        self.heuristic = h
+        self.optimization_function = f
         self.costs = dict()
 
     def reset(self):
@@ -219,8 +245,8 @@ class BestFirstSearch(ClassicalSearch):
                 new_cost = self.costs[current_node] + self.cost_function(
                     current_node, neighbor_node
                 )
-                estimated_cost = self.h(neighbor_node, dest)
-                total_cost = self.f(new_cost, estimated_cost)
+                estimated_cost = self.heuristic(neighbor_node, dest)
+                total_cost = self.optimization_function(new_cost, estimated_cost)
 
                 if neighbor_node not in self.explored:
                     if (
@@ -239,6 +265,8 @@ class BestFirstSearch(ClassicalSearch):
 
 
 class AStar(BestFirstSearch):
+    OPTIMAL = True
+
     def __init__(self, map, h, cost_function=None):
         def f(cost, heuristic):
             return cost + heuristic
@@ -247,6 +275,8 @@ class AStar(BestFirstSearch):
 
 
 class GreedySearch(BestFirstSearch):
+    OPTIMAL = False
+
     def __init__(self, map, h, cost_function=None):
         def f(cost, heuristic):
             return heuristic
@@ -255,14 +285,18 @@ class GreedySearch(BestFirstSearch):
 
 
 class UniformCostSearch(BestFirstSearch):
+    OPTIMAL = True
+
     def __init__(self, map, cost_function=None):
         def f(cost, heuristic):
             return cost
 
-        super().__init__(map, h, f, cost_function=cost_function)
+        super().__init__(map, lambda x, y: 0, f, cost_function=cost_function)
 
 
 class TourSearch(Search):
+    OPTIMAL = False
+
     def __init__(self, map, meta_heuristic, alg: ClassicalSearch, cost_function=None):
         self.map = map
         self.meta_heuristic = meta_heuristic
@@ -338,20 +372,86 @@ class RestrictedTourSearch(Search):
         )
 
 
-def get_proportion(map: Map, heuristic, n=10):
-    """
-    computa um estimado da proporção entre distancia real e heursitica"""
-    acc = 0
-    for i in range(0, n):
-        A = random.choice(list(map._node_names.keys()))
-        B = random.choice(list(map._node_names.keys()))
+class AndOrRestrictedTourSearch(Search):
+    OPTIMAL = False
 
-        H = heuristic(A, B)
-        if H == 0:
-            continue
-        alg = AStar(map, heuristic)
-        res = alg.run(A, B, reset=True)
-        len = map.path_length(res.path)
-        acc += len / H
-        # print(len,H,len/H)
-    return acc / n
+    def __init__(self, map, meta_heuristic, alg: ClassicalSearch):
+        self.map = map
+        self.meta_heuristic = meta_heuristic
+        self.alg = alg
+        self.nodes_in_tour = list()
+        self.pseudo_route = []
+
+    def run(
+        self, src, nodes: Set[int], order_restrictions: Dict[int, Set[int | Tuple[int]]]
+    ):
+        """
+        A:{X,[Z,Y]} A depende de X e de (Z ou Y)
+        """
+        self.nodes_in_tour = [src] + list(nodes)
+        restrictions = {**{n: set() for n in nodes}, **order_restrictions}
+        missing = nodes
+        completed = set()
+        curr_node = src
+        route = [src]
+        self.pseudo_route = [src]
+
+        def done():
+            return restrictions and nodes.intersection(set(restrictions.keys()))
+
+        while done():
+            print("completed=", completed)
+            print("curr_node=", curr_node)
+            print("route=", route)
+            print("restrictions=", restrictions)
+
+            possible = set()
+            for k, v in restrictions.items():
+                possible.add(k)
+                for r in v:
+                    if type(r) == tuple:
+                        possible = possible.union(set(r))
+                    if type(r) == int:
+                        possible.add(r)
+
+            print("possible=", possible)
+            candidates = {node for node in possible if not restrictions.get(node)}
+
+            def min_func(curr_node, candidate):
+                if type(candidate) == int:
+                    return self.meta_heuristic(curr_node, candidate)
+                if type(candidate) == tuple:
+                    return min(list(candidate), key=lambda x: min_func(curr_node, x))
+
+            print("candidates = ", candidates)
+
+            next = min(candidates, key=lambda x: min_func(curr_node, x))
+            print("next = ", next)
+
+            for depends, restriction in restrictions.items():
+                if next in restriction:
+                    restriction.remove(next)
+                to_pop = []
+                for item in restriction:
+                    if type(item) == tuple and next in item:
+                        to_pop.append(item)
+
+                for item in to_pop:
+                    restriction.remove(item)
+            try:
+                restrictions.pop(next)
+            except:
+                pass
+            print("restrictions=", restrictions)
+            self.pseudo_route.append(next)
+
+            r = self.alg.run(curr_node, next)
+            self.alg.reset()
+            route += r.path[1:]
+            curr_node = next
+        return SearchResultOnMap(
+            route,
+            pseudo_route=self.pseudo_route,
+            map=self.map,
+            nodes_to_highlight={node for node in self.nodes_in_tour},
+        )
