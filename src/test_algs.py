@@ -13,19 +13,23 @@ from ia.ui.map_generator import MapGenerator, MapGeneratorState
 
 map = Map("Gualtar, PT", "file")
 map.fetch_map()
+# map.plot()
 
 
-AA = map.get_node_by_name("AA")
-GG = map.get_node_by_name("GG")
-AJ = map.get_node_by_name("AJ")
-GA = map.get_node_by_name("GA")
+A = map.get_node_by_name("A")
+CO = map.get_node_by_name("CO")
+FY = map.get_node_by_name("FY")
+IG = map.get_node_by_name("IG")
 HI = map.get_node_by_name("HI")
 
 
-alg = GreedySearch(map, map.distance)
-route_alg = RestrictedTourSearch(map, map.distance, alg)
-res = route_alg.run(AA, {GG, AA}, {GG: {AA}})
-print(res)
-res.plot()
+alg = AStar(map, map.distance)
+route_alg = AndOrRestrictedTourSearch(map, map.distance, alg)
+route_alg2 = DeliverySearch(map,map.distance,alg)
 
+# res1 = route_alg.run(A, {IG, A}, {HI:{},IG: {A,(CO,FY)}})
+# res1.plot()
+res2 = route_alg2.run(A,IG,{A,HI,(CO,FY)})
+res2.plot()
+# res.plot()
 # AA AJ GA GG HI
