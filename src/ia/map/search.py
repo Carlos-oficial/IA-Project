@@ -54,7 +54,7 @@ class SearchResultOnMap(SearchResult):
     def plot(self, color="red", show=True):
         nc = [
             "#FFFF00"
-            if type(self.pseudo_route)==list and node in self.pseudo_route
+            if type(self.pseudo_route) == list and node in self.pseudo_route
             else "r"
             if node in self.path
             else "g"
@@ -118,7 +118,7 @@ class SearchResultOnMap(SearchResult):
 
 
 class Search:
-    def run(self, src,dest,reset=False) -> SearchResult:
+    def run(self, src, dest, reset=False) -> SearchResult:
         pass
 
     def __str__(self):
@@ -467,26 +467,24 @@ class DeliverySearch(Search):
         self.nodes_in_tour = list()
         self.pseudo_route = []
 
-    def run(
-        self, src, dest , order_restrictions: Set[int | Tuple[int]]
-    ):
+    def run(self, src, dest, order_restrictions: Set[int | Tuple[int]]):
         """
         A:{X,[Z,Y]} A depende de X e de (Z ou Y)
         """
         self.nodes_in_tour = [src]
-        self.curr_path = self.alg.run(src,dest,reset=True)
-        restrictions = {dest:order_restrictions}
+        self.curr_path = self.alg.run(src, dest, reset=True)
+        restrictions = {dest: order_restrictions}
         completed = set()
         curr_node = src
         route = [src]
-        self.pseudo_route = [src,dest]
+        self.pseudo_route = [src, dest]
 
         def not_done():
-            return restrictions # and nodes.intersection(set(restrictions.keys()))
+            return restrictions  # and nodes.intersection(set(restrictions.keys()))
 
-        intial_path = self.alg.run(src,dest)
+        intial_path = self.alg.run(src, dest)
         while not_done():
-            print("curr_node",curr_node)            
+            print("curr_node", curr_node)
             print("restrictions=", restrictions)
             for depends, restriction in restrictions.items():
                 if curr_node in restriction:
@@ -502,7 +500,8 @@ class DeliverySearch(Search):
                 restrictions.pop(curr_node)
             except:
                 pass
-            if not restrictions: break
+            if not restrictions:
+                break
 
             possible = set()
             for k, v in restrictions.items():
@@ -513,30 +512,31 @@ class DeliverySearch(Search):
                     if type(r) == int:
                         possible.add(r)
 
-            
             candidates = {node for node in possible if not restrictions.get(node)}
 
             def min_func(curr_node, candidate):
                 if type(candidate) == int:
-                    cost = 1000000 # aka +inf
-                    for index,node in enumerate( self.pseudo_route):
-                        if self.meta_heuristic(node,candidate)<cost:
-                            cost = self.meta_heuristic(node,candidate)
+                    cost = 1000000  # aka +inf
+                    for index, node in enumerate(self.pseudo_route):
+                        if self.meta_heuristic(node, candidate) < cost:
+                            cost = self.meta_heuristic(node, candidate)
                     return cost
-                
+
                 if type(candidate) == tuple:
                     return min(list(candidate), key=lambda x: min_func(curr_node, x))
 
-
             next = min(candidates, key=lambda x: min_func(curr_node, x))
 
-            
-            edges  = list(zip(self.pseudo_route[:-1],self.pseudo_route[1:]))
-            
-            edge_to_expand = min(edges, key=lambda pair:self.meta_heuristic(pair[0],next)+self.meta_heuristic(next,pair[1]))
-                
-            index = edges.index(edge_to_expand)+1
-            self.pseudo_route.insert(index,next)
+            edges = list(zip(self.pseudo_route[:-1], self.pseudo_route[1:]))
+
+            edge_to_expand = min(
+                edges,
+                key=lambda pair: self.meta_heuristic(pair[0], next)
+                + self.meta_heuristic(next, pair[1]),
+            )
+
+            index = edges.index(edge_to_expand) + 1
+            self.pseudo_route.insert(index, next)
             curr_node = next
             print("\n\n")
 
@@ -547,10 +547,10 @@ class DeliverySearch(Search):
                 result.append(elem)
 
         self.pseudo_route = result
-        for curr_node,next in zip(self.pseudo_route[:-1],self.pseudo_route[1:]):
-            r = self.alg.run(curr_node, next,reset=True)
+        for curr_node, next in zip(self.pseudo_route[:-1], self.pseudo_route[1:]):
+            r = self.alg.run(curr_node, next, reset=True)
             print(r.path)
-            
+
             route += r.path[1:]
         return SearchResultOnMap(
             route,

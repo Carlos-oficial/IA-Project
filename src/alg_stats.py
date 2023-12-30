@@ -1,4 +1,9 @@
+import json
+from collections import defaultdict
+from typing import *
+
 import matplotlib.pyplot as plt
+import numpy as np
 import osmnx as ox
 
 from ia.drivers.driver import Driver
@@ -7,10 +12,6 @@ from ia.map.map import Map
 from ia.map.search import *
 from ia.sym import Simulation
 from ia.ui.map_generator import MapGenerator, MapGeneratorState
-import numpy as np
-from typing import *
-import json
-from collections import defaultdict
 
 
 def get_proportion(map: Map, heuristic, n=100):

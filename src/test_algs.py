@@ -25,11 +25,11 @@ HI = map.get_node_by_name("HI")
 
 alg = AStar(map, map.distance)
 route_alg = AndOrRestrictedTourSearch(map, map.distance, alg)
-route_alg2 = DeliverySearch(map,map.distance,alg)
+route_alg2 = DeliverySearch(map, map.distance, alg)
 
 # res1 = route_alg.run(A, {IG, A}, {HI:{},IG: {A,(CO,FY)}})
 # res1.plot()
-res2 = route_alg2.run(A,IG,{A,HI,(CO,FY)})
+res2 = route_alg2.run(A, IG, {A, HI, (CO, FY)})
 res2.plot()
 # res.plot()
 # AA AJ GA GG HI

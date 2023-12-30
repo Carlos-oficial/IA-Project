@@ -139,7 +139,7 @@ class Simulation:
                 # if where_to_get.get(item):
                 #     where_to_get[item]
                 # else:
-                    where_to_get[item] = (w)
+                where_to_get[item] = w
         order_weight = sum(p.weight * amm for p, amm in order.products.items())
         driver_emissions: Dict[Driver, float] = dict()
         driver_search_result: Dict[Driver, SearchResult] = dict()
@@ -172,9 +172,9 @@ class Simulation:
             """
                 )
         drivers = list(driver_emissions.keys())
-        print("Drivers:",driver_emissions,"\n\n")
+        print("Drivers:", driver_emissions, "\n\n")
         drivers = sorted(drivers, key=lambda x: driver_emissions[x])
-        
+
         if len(drivers) == 0:
             raise Exception("No available driver")
         self.send_driver(order, drivers[0], res)

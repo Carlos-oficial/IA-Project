@@ -30,16 +30,17 @@ class Driver:
         self.last_search = None
         self.current: Order = None
 
-    def __str__(self):return self.name
+    def __str__(self):
+        return self.name
 
     def __repr__(self):
-        return (
-            f"""Driver(id={self.id}, name={self.name},
+        return f"""Driver(id={self.id}, name={self.name},
             vehicle={self.veichle}, ratings={self.ratings},
             current_road={self.curr_road}, location={self.curr_edge}, progress={self.progress_along_edge}
-            """ +( f"aka {self.map._node_names[self.curr_edge[0]],self.map._node_names[self.curr_edge[1]]})\n"
+            """ + (
+            f"aka {self.map._node_names[self.curr_edge[0]],self.map._node_names[self.curr_edge[1]]})\n"
             if self.curr_edge is not None
-            else "\n""")
+            else "\n" ""
         )
 
     def add_cargo(cargo: Dict[Product, int]):
@@ -97,7 +98,7 @@ class Driver:
             if len(self.to_go) <= 1:
                 return True
             # avança de estrada
-            
+
             u, v = self.to_go[0], self.to_go[1]
             self.curr_road = self.map.roads_mapped[u][v]
             self.curr_edge = u, v
