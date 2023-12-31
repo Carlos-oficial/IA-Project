@@ -122,13 +122,6 @@ class Simulation:
     def estimated_time_btwn_points(
         self, driver: Driver, order: Order, node1: int, node2: int
     ):
-        print(
-            "estimating time",
-            (
-                (self.map._node_positions[node1]),
-                (self.map._node_positions[node2]),
-            ),
-        )
         x1, y1 = self.map._node_positions[node1]
         x2, y2 = self.map._node_positions[node2]
 
@@ -146,7 +139,6 @@ class Simulation:
             if road.src in circle_filter and road.to in circle_filter:
                 min_max_speed = min(min_max_speed, road.max_speed())
 
-        print(circle_filter)
         return (
             3.6
             * self.map.distance(node1, node2)
@@ -446,7 +438,11 @@ class Simulation:
                 for road in self.map.roads:
                     road.set_traffic(0.5, randomize=True)
                     road.weather = Weather.Mist
-
+            case _:
+                self.difficulty = Simulation.Dificulty.HARD
+                for road in self.map.roads:
+                    road.set_traffic(0.5, randomize=True)
+                    road.weather = Weather.Mist
         # end match
         self.ui()
 

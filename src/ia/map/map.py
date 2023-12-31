@@ -28,7 +28,7 @@ class Map(Problem):
 
         self._reference_point: Tuple[float, float] = (0.0, 0.0)
 
-        self.factor = 1.6
+        self.factor = 1
         self.pickup_points: Dict[str, int] = dict()
         self.places: Dict[int, Place] = dict()
         self.roads: Set[Road] = set({})
@@ -241,10 +241,13 @@ class Map(Problem):
 
         raise ValueError("name doesnt exist")
 
-    def distance(self, u: int, v: int) -> float:
+    def euclidean_distance(self, u: int, v: int) -> float:
         ux, uy = self._node_positions[u]
         vx, vy = self._node_positions[v]
         return ((uy - vy) ** 2 + (ux - vx) ** 2) ** 0.5
+
+    def distance(self, u: int, v: int) -> float:
+        return self.euclidean_distance(u, v) * self.factor
 
     def _edge_length(self, u, v) -> float:
         edge_data = self.graph.get_edge_data(u, v)

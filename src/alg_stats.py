@@ -5,6 +5,7 @@ from typing import *
 import matplotlib.pyplot as plt
 import numpy as np
 import osmnx as ox
+import seaborn as sns
 
 from ia.drivers.driver import Driver
 from ia.drivers.veichle import *
@@ -19,12 +20,13 @@ def get_proportion(map: Map, heuristic, n=100):
     computa um estimado da proporção entre distancia real e heursitica
     """
     acc = 0
-    for i in range(0, n):
-        A = random.choice(list(map._node_names.keys()))
-        B = random.choice(list(map._node_names.keys()))
+    s1 = list(map._node_names.keys())
 
+    for i in range(0, n):
+        A = random.choice(s1)
+        B = random.choice(s1)
         H = heuristic(A, B)
-        if H == 0:
+        if H <= 20:
             continue
         alg = AStar(map, heuristic)
         res = alg.run(A, B, reset=True)
@@ -57,22 +59,25 @@ def test_algorithms(map: Map, *algs: ClassicalSearch, n=100):
     return results
 
 
-# map.proportion = get_proportion(map, map.distance, n=5000)
-# print("Proportion is", map.proportion)
-
 if __name__ == "__main__":
     try:
-        n = int(input("test how many? "))
+        # n = int(input("test how many? "))
+        n = 10000
     except Exception as e:
         "input is not an integer"
     else:
         map = Map("Gualtar, PT", "file")
         map.fetch_map()
+        map.factor = 1
+        map.factor = get_proportion(map, map.distance, n=10000)
+        print("Factor is", map.factor)
         data = test_algorithms(
             map,
             AStar(map, map.distance),
             GreedySearch(map, map.distance),
             UniformCostSearch(map),
+            BFS(map),
+            DFS(map),
             n=n,
         )
         # print(json.dumps(data, indent=2))
@@ -92,6 +97,39 @@ if __name__ == "__main__":
                     "exploredN/pathN": alg_results["explored_n"]
                     / alg_results["path_n"],
                 }
+
+        data = proportions
+
+        reshaped_data = []
+        for key, value in data.items():
+            for algorithm, metrics in value.items():
+                reshaped_data.append(
+                    {
+                        "Node": key,
+                        "Algorithm": algorithm,
+                        "Relative Path Cost": metrics["relative_path_cost"],
+                        "ExploredN/PathN": metrics["exploredN/pathN"],
+                    }
+                )
+
+        # Create a DataFrame from the reshaped data
+        import pandas as pd
+
+        df = pd.DataFrame(reshaped_data)
+
+        # Create box plots using Seaborn
+        plt.figure(figsize=(14, 8))
+        sns.set_theme(style="whitegrid")
+        box_plot = sns.boxplot(x="Algorithm", y="Relative Path Cost", data=df)
+        plt.title("Relative Path Cost by Algorithm")
+        plt.show()
+
+        plt.figure(figsize=(14, 8))
+        sns.set_theme(style="whitegrid")
+        box_plot = sns.boxplot(x="Algorithm", y="ExploredN/PathN", data=df)
+        plt.title("ExploredN/PathN by Algorithm")
+        plt.show()
+
         # print(json.dumps(proportions,indent=2))«
 
         algorithm_sums = defaultdict(
@@ -125,3 +163,25 @@ if __name__ == "__main__":
         # Print the results
         for algorithm, averages in algorithm_averages.items():
             print(f"{algorithm}: \n\t {averages}")
+
+        methods = list(algorithm_averages.keys())
+        relative_path_costs = [
+            value["relative_path_cost"] for value in algorithm_averages.values()
+        ]
+        exploredN_pathN = [
+            value["exploredN/pathN"] for value in algorithm_averages.values()
+        ]
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        bar_width = 0.35
+        bar2 = ax.bar(methods, exploredN_pathN, bar_width, label="ExploredN/PathN")
+        bar1 = ax.bar(
+            methods, relative_path_costs, bar_width, label="Relative Path Cost"
+        )
+
+        ax.set_ylabel("Values")
+        ax.set_title("A* vs Greedy Search vs Uniform Cost Search vs BFS vs DFS")
+        ax.legend()
+
+        plt.show()
