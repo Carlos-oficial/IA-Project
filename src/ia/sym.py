@@ -64,7 +64,8 @@ class Simulation:
             try:
                 self.dispatch_order(order)
             except Exception as e:
-                pass
+                print(e)
+                traceback.print_exc()
             else:
                 self.pending_orders.remove(order)
                 self.orders_in_progress.append(order)
@@ -127,6 +128,7 @@ class Simulation:
         )
 
     def dispatch_order(self, order: Order):
+        print("Dispatching", order)
         end_node = order.destination
         end_node = self.map._name_nodes[order.destination.name]
 
@@ -136,35 +138,40 @@ class Simulation:
             can_get = set(order.products.keys()).intersection(set(w.products.values()))
             dispatched_products = dispatched_products.union(can_get)
             for item in can_get:
-                # if where_to_get.get(item):
-                #     where_to_get[item]
-                # else:
-                where_to_get[item] = w
+                if not where_to_get.get(item):
+                    where_to_get[item] = tuple([w])
+                else:
+                    t = where_to_get[item]
+                    l = list(t)
+                    l.append(w)
+                    t = tuple(l)
+                    where_to_get[item] = t
+
         order_weight = sum(p.weight * amm for p, amm in order.products.items())
         driver_emissions: Dict[Driver, float] = dict()
         driver_search_result: Dict[Driver, SearchResult] = dict()
         for driver, node in self.available_drivers.items():
             if driver.veichle.weight_cap >= order_weight:
-                search = AndOrRestrictedTourSearch(
+                search = DeliverySearch(
                     self.map,
-                    self.map.distance,
-                    GreedySearch(
+                    # self.map.distance,
+                    lambda x, y: self.estimated_time(driver, order, x, y),
+                    AStar(
                         self.map,
                         h=lambda x, y: self.estimated_time(driver, order, x, y),
                     ),
                 )
                 warehouse_nodes = {
-                    self.warehouse_points[w] for w in where_to_get.values()
+                    tuple(self.warehouse_points[x] for x in w)
+                    for w in where_to_get.values()
                 }
                 where_to_go = warehouse_nodes.union({end_node})
-                print((node, where_to_go, {end_node: warehouse_nodes}))
-                res = search.run(node, where_to_go, {end_node: warehouse_nodes})
+                res = search.run(node, end_node, warehouse_nodes)
                 driver_emissions[driver] = self.path_emissions(driver.veichle, res.path)
                 driver_search_result[driver] = res
                 print(
                     f"""
             driver:{driver.name}
-            path: {res.path}
             veichle: {driver.veichle.__class__.__name__} 
             {self.map.path_length(res.path)/1000} km
             {self.path_emissions(driver.veichle,res.path)}g of CO2 
@@ -172,13 +179,11 @@ class Simulation:
             """
                 )
         drivers = list(driver_emissions.keys())
-        print("Drivers:", driver_emissions, "\n\n")
         drivers = sorted(drivers, key=lambda x: driver_emissions[x])
 
         if len(drivers) == 0:
             raise Exception("No available driver")
         self.send_driver(order, drivers[0], res)
-        print("picked", drivers[0].name)
 
     def place_order_command(
         self,
@@ -433,6 +438,7 @@ class Simulation:
                 toks = command.split(" ")
                 command = commands[toks[0]]
                 command(*toks[1:])
+                print("\n\n")
                 if toks[0] == "quit":
                     return
             except Exception as e:

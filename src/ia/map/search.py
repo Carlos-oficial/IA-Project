@@ -484,8 +484,6 @@ class DeliverySearch(Search):
 
         intial_path = self.alg.run(src, dest)
         while not_done():
-            print("curr_node", curr_node)
-            print("restrictions=", restrictions)
             for depends, restriction in restrictions.items():
                 if curr_node in restriction:
                     restriction.remove(curr_node)
@@ -538,7 +536,6 @@ class DeliverySearch(Search):
             index = edges.index(edge_to_expand) + 1
             self.pseudo_route.insert(index, next)
             curr_node = next
-            print("\n\n")
 
         result = [self.pseudo_route[0]]  # Initialize the result with the first element
 
@@ -549,8 +546,6 @@ class DeliverySearch(Search):
         self.pseudo_route = result
         for curr_node, next in zip(self.pseudo_route[:-1], self.pseudo_route[1:]):
             r = self.alg.run(curr_node, next, reset=True)
-            print(r.path)
-
             route += r.path[1:]
         return SearchResultOnMap(
             route,
