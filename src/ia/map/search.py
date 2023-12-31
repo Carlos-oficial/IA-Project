@@ -93,7 +93,7 @@ class SearchResultOnMap(SearchResult):
                 if node in self.path
             },
             font_color="w",
-            font_size=10,
+            font_size=11,
             font_weight="light",
             horizontalalignment="right",
             verticalalignment="bottom",

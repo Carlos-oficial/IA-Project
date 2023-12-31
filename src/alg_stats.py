@@ -59,6 +59,7 @@ def test_algorithms(map: Map, *algs: ClassicalSearch, n=100):
 
 # map.proportion = get_proportion(map, map.distance, n=5000)
 # print("Proportion is", map.proportion)
+
 if __name__ == "__main__":
     try:
         n = int(input("test how many? "))

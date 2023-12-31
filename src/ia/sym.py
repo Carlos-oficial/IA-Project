@@ -119,12 +119,39 @@ class Simulation:
             max_speed = max(max_speed, road.max_speed())
         return (min_speed + max_speed) / 2
 
-    def estimated_time(self, driver: Driver, order: Order, node1: int, node2: int):
+    def estimated_time_btwn_points(
+        self, driver: Driver, order: Order, node1: int, node2: int
+    ):
+        print(
+            "estimating time",
+            (
+                (self.map._node_positions[node1]),
+                (self.map._node_positions[node2]),
+            ),
+        )
+        x1, y1 = self.map._node_positions[node1]
+        x2, y2 = self.map._node_positions[node2]
+
+        xm, ym = (x1 + x2) / 2, (y1 + y2) / 2
+        radius_sq = (x1 - xm) ** 2 + (y1 - ym) ** 2
+
+        circle_filter = {
+            node
+            for node, (X, Y) in self.map._node_positions.items()
+            if ((X - xm) ** 2 + (Y - ym) ** 2 <= radius_sq)
+        }
+
+        min_max_speed = 50
+        for road in self.map.roads:
+            if road.src in circle_filter and road.to in circle_filter:
+                min_max_speed = min(min_max_speed, road.max_speed())
+
+        print(circle_filter)
         return (
             3.6
             * self.map.distance(node1, node2)
-            * 1.6
-            / driver.veichle.calc_max_velocity(cargo=order.weight())
+            * self.map.factor
+            / min(driver.veichle.calc_max_velocity(cargo=order.weight()), min_max_speed)
         )
 
     def dispatch_order(self, order: Order):
@@ -155,10 +182,12 @@ class Simulation:
                 search = DeliverySearch(
                     self.map,
                     # self.map.distance,
-                    lambda x, y: self.estimated_time(driver, order, x, y),
+                    lambda x, y: self.estimated_time_btwn_points(driver, order, x, y),
                     AStar(
                         self.map,
-                        h=lambda x, y: self.estimated_time(driver, order, x, y),
+                        h=lambda x, y: self.estimated_time_btwn_points(
+                            driver, order, x, y
+                        ),
                     ),
                 )
                 warehouse_nodes = {

@@ -1,4 +1,5 @@
 import heapq
+import random
 import string
 from typing import Any, Dict, List, Set, Tuple
 
@@ -27,12 +28,12 @@ class Map(Problem):
 
         self._reference_point: Tuple[float, float] = (0.0, 0.0)
 
+        self.factor = 1.6
         self.pickup_points: Dict[str, int] = dict()
         self.places: Dict[int, Place] = dict()
         self.roads: Set[Road] = set({})
         self.roads_mapped: dict = dict()
 
-        self.proportion = None
         # variaveis para cache
         self._node_positions: Dict[int, Tuple[float, float]] = dict()
         self._render_positions: dict = dict()
@@ -72,7 +73,6 @@ class Map(Problem):
         )
 
         self.from_nx_graph(G)
-
         ox.save_graphml(G, filepath=self.filepath)
 
         return self.graph
@@ -133,7 +133,12 @@ class Map(Problem):
             if warehouse is not None:
                 self.pickup_points[warehouse] = node
 
-            place = Place(name, x=data["x"], y=data["y"], id=node)
+            place = Place(
+                name,
+                x=self._node_positions[node][0],
+                y=self._node_positions[node][1],
+                id=node,
+            )
             self.places[node] = place
 
         for u, v, k in self.graph.edges(data=True):
