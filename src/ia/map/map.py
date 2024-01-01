@@ -263,6 +263,47 @@ class Map(Problem):
         except Exception as e:
             return 10000000  # infinito
 
+    def estimated_time_in_road(self, driver, order_weight, x, y):
+        road: Road = self.roads_mapped[x][y]
+        vel = min(
+            driver.veichle.calc_max_velocity(cargo=order_weight), road.max_speed()
+        )
+        return 3.6 * self.road_length(x, y) / vel
+
+    def estimated_time_in_path(self, path: List[int], max_speed=50):
+        total_weight = 0
+        for i in range(len(path) - 1):
+            u, v = path[i], path[i + 1]
+            road: Road = self.roads_mapped[u][v]
+            vel = min(max_speed, road.max_speed())
+            total_weight += 3.6 * self.road_length(u, v) / vel
+        return total_weight
+
+    def estimated_time_btwn_points(self, driver, order_weight, node1: int, node2: int):
+        x1, y1 = self._node_positions[node1]
+        x2, y2 = self._node_positions[node2]
+
+        xm, ym = (x1 + x2) / 2, (y1 + y2) / 2
+        radius_sq = (x1 - xm) ** 2 + (y1 - ym) ** 2
+
+        circle_filter = {
+            node
+            for node, (X, Y) in self._node_positions.items()
+            if ((X - xm) ** 2 + (Y - ym) ** 2 <= radius_sq)
+        }
+
+        min_max_speed = 50
+        for road in self.roads:
+            if road.src in circle_filter and road.to in circle_filter:
+                min_max_speed = min(min_max_speed, road.max_speed())
+
+        return (
+            3.6
+            * self.distance(node1, node2)
+            * self.factor
+            / min(driver.veichle.calc_max_velocity(cargo=order_weight), min_max_speed)
+        )
+
     def get_place(self, name: str) -> Place:
         ret = self.places.get(name)
         if ret is None:

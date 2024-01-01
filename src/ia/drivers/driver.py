@@ -6,21 +6,29 @@ from ia.map.map import Map
 from ia.map.place import Place
 from ia.map.road import Road
 from ia.orders.products import *
+from ia.map.search import *
+
+
+class OrderWrapper:
+    def __init__(self, order: Order):
+        self.order: Order = order
 
 
 class Driver:
     _id = 0
 
-    def __init__(self, name, veichle, map) -> None:
+    def __init__(self, name, veichle, map, initial_node) -> None:
         self.id = Driver._id
         Driver._id += 1
         self.name: str = name
         self.map: Map = map
         self.to_go: List[int] = []
         self.pseudo_route: List[int] = []
+        self.curr_node = initial_node
         self.curr_edge: Tuple[int, int] = None  # (u,v)
         self.curr_road: Road = None
         self.curr_order: Order = None
+        self.time_left_upper_bound = 0
         self.warehouses: Dict[Warehouse, int] = None
         self.progress_along_edge: float = 0.0
         self.cargo: {Product: int} = dict()
@@ -28,7 +36,7 @@ class Driver:
         self.ratings: List[float] = 0
         self.going_path = list()
         self.last_search = None
-        self.current: Order = None
+        self.current_order: Order = None
 
     def __str__(self):
         return self.name
@@ -43,7 +51,60 @@ class Driver:
             else "\n" ""
         )
 
-    def add_cargo(cargo: Dict[Product, int]):
+    def where_to_get(self, order: Order):
+        dispatched_products = set()
+        where_to_get = dict()
+        for w in self.warehouses:
+            can_get = set(order.products.keys()).intersection(set(w.products.values()))
+            dispatched_products = dispatched_products.union(can_get)
+            for item in can_get:
+                if not where_to_get.get(item):
+                    where_to_get[item] = tuple([w])
+                else:
+                    t = where_to_get[item]
+                    l = list(t)
+                    l.append(w)
+                    t = tuple(l)
+                    where_to_get[item] = t
+        return where_to_get
+
+    def calc_order_path(self, order: Order):
+        warehouse_nodes = {
+            tuple(self.warehouses[x] for x in w)
+            for w in self.where_to_get(order).values()
+        }
+
+        search = DeliverySearch(
+            self.map,
+            lambda x, y: self.map.estimated_time_btwn_points(
+                self, order.weight(), x, y
+            ),
+            AStar(
+                self.map,
+                h=lambda x, y: self.map.estimated_time_btwn_points(
+                    self, order.weight(), x, y
+                ),
+                cost_function=lambda x, y: self.map.estimated_time_in_road(
+                    self, order.weight(), x, y
+                ),
+            ),
+        )
+        dest = {p: n for n, p in self.map.places.items()}[order.destination]
+        res = search.run(self.curr_node, dest, warehouse_nodes)
+        self.last_search = res
+        return res
+
+    # def update_path(self,curr_time =self.clock):
+    #     pass
+
+    # def go(self, order, driver: Driver, res: SearchResultOnMap):
+    #     self.set_pseudo_route(res.pseudo_route)
+    #     self.set_path(res.path)
+    #     self.curr_order = order
+    #     self.warehouses = self.warehouse_points
+    #     print(driver, " goin")
+
+    def pickup_products(cargo: Dict[Product, int]):
         for product, ammount in cargo.items():
             if self.cargo.get(product):
                 self.cargo[product] += ammount
@@ -55,13 +116,23 @@ class Driver:
 
     def set_path(self, path: List[int]):
         self.to_go = path
-        u, v = path[0], path[1]
+        path_edges = list(zip(path[:-1], path[1:]))
+        self.time_left_upper_bound = 0.0
+        for u, v in path_edges:
+            self.time_left_upper_bound += self.map.estimated_time_in_road(
+                self, self.current_order.weight(), u, v
+            )
+
+        self.time_left_upper_bound *= 1.1
+        u, v = list(path_edges)[0]
         self.curr_road = self.map.roads_mapped[u][v]
         self.curr_edge = u, v
         self.progress_along_edge = 0.0
 
-    def advance(self, seconds=1) -> bool:
+    def advance(self, sym_time, seconds=1) -> bool:
+        self.time_left_upper_bound -= seconds
         u, v = self.curr_edge
+        print("edge: ", self.curr_edge)
         self.curr_road = self.map.roads_mapped[u][v]
         road_max_speed = self.curr_road.max_speed()
         veichle_max_speed = self.veichle.calc_max_velocity(
@@ -71,15 +142,24 @@ class Driver:
         distance = speed / 3.6
         self.progress_along_edge += distance
         road_len = self.curr_road.length
+
+        # print("time elapsed",sym_time - self.current_order.dispatch_time)
+        # print("time left",self.map.estimated_time_in_path(self.to_go,max_speed=veichle_max_speed)-self.progress_along_edge*3.6/veichle_max_speed)
+        # print("time limit",self.current_order.time_limit - sym_time)
+        # print("time_left_upper_bound",self.time_left_upper_bound)
+
+        time_left = (
+            self.map.estimated_time_in_path(self.to_go, max_speed=veichle_max_speed)
+            - self.progress_along_edge * 3.6 / veichle_max_speed
+        )
         if self.progress_along_edge >= road_len:
             self.progress_along_edge = 0.0
             node = self.to_go.pop(0)
+            u, v = self.to_go[0], self.to_go[1]
+            self.curr_edge = u, v
+
             if node == self.pseudo_route[0]:
                 self.pseudo_route.pop(0)
-                w = {
-                    node: warehouse
-                    for warehouse, node in self.map.pickup_points.items()
-                }.get(node)
                 w = {
                     node: warehouse for warehouse, node in self.warehouses.items()
                 }.get(node)
@@ -95,13 +175,22 @@ class Driver:
                     for key in keys_to_remove:
                         self.curr_order.products.pop(key)
 
+            if True:  # time_left>self.time_left_upper_bound:
+                print("we here")
+                self.calc_order_path(self.curr_order)
+                new_time = time_left
+                self.time_left_upper_bound = new_time * 1.1
+
             if len(self.to_go) <= 1:
+                self.curr_node = self.to_go[-1]
                 return True
             # avança de estrada
 
             u, v = self.to_go[0], self.to_go[1]
             self.curr_road = self.map.roads_mapped[u][v]
             self.curr_edge = u, v
+            self.curr_node = self.curr_edge[0]
+
         return False
 
     def add_rating(self, rating):

@@ -2,11 +2,11 @@ class Veichle:
     def __init__(
         self, velocity_cap, avg_velocity, weight_cap, vel_decrement, emissions: int
     ):
-        self.velocity_cap = velocity_cap
-        self.avg_velocity = avg_velocity
-        self.weight_cap = weight_cap
-        self.vel_decrement = vel_decrement
-        self.emissions = emissions
+        self.velocity_cap: float = velocity_cap
+        self.avg_velocity: float = avg_velocity
+        self.weight_cap: float = weight_cap
+        self.vel_decrement: float = vel_decrement
+        self.emissions: float = emissions
 
     def calc_max_velocity(self, cargo: float = 0):
         return self.velocity_cap - cargo * self.vel_decrement

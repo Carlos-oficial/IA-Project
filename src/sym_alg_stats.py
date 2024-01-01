@@ -69,10 +69,10 @@ if __name__ == "__main__":
     center = map.central_node()
 
     dirvers = {
-        Driver("Júlio", Bike(), map): center,
-        Driver("Carlos", Bike(), map): center,
-        Driver("Gerson", Car(), map): center,
-        Driver("Filipe", Bycicle(), map): center,
+        Driver("Júlio", Bike(), map, center): center,
+        Driver("Carlos", Bike(), map, center): center,
+        Driver("Gerson", Car(), map, center): center,
+        Driver("Filipe", Bycicle(), map, center): center,
     }
 
     s = Simulation(map, dirvers, warehouses=s.warehouses)

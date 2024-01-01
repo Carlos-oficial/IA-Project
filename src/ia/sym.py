@@ -47,6 +47,8 @@ class Simulation:
         self.drivers: Dict[int, Driver] = {
             driver.id: driver for driver in drivers.keys()
         }
+        for driver in drivers.keys():
+            driver.warehouses = self.warehouse_points
         self.drivers_in_transit: List[Driver] = list()  # id:((from_id,to_id),meters)
         self.available_drivers: Dict[Driver, int] = drivers  # id:node_id
 
@@ -74,9 +76,10 @@ class Simulation:
             self.update_driver(driver, time_passed=n)
 
     def update_driver(self, driver: Driver, time_passed: int = 1):
-        if driver.advance(seconds=time_passed):
+        if driver.advance(self.clock, seconds=time_passed):
             self.drivers_in_transit.remove(driver)
             self.available_drivers[driver] = driver.curr_edge[1]
+            # driver.update_path(curr_time =self.clock)
             self.orders_in_progress.remove(driver.curr_order)
             # self.handle_order_delivered(driver,order)
             self.drivers
@@ -153,11 +156,7 @@ class Simulation:
         )
         return 3.6 * road.length / vel
 
-    def dispatch_order(self, order: Order):
-        print("Dispatching", order)
-        end_node = order.destination
-        end_node = self.map._name_nodes[order.destination.name]
-
+    def where_to_get(self, order: Order):
         dispatched_products = set()
         where_to_get = dict()
         for w in self.warehouses:
@@ -172,13 +171,27 @@ class Simulation:
                     l.append(w)
                     t = tuple(l)
                     where_to_get[item] = t
+        return where_to_get
 
+    def dispatch_order(self, order: Order):
+        print("Dispatching", order)
+        end_node = order.destination
+        end_node = self.map._name_nodes[order.destination.name]
+
+        where_to_get = self.where_to_get(order)
+        print("where_to_get", where_to_get)
         order_weight = sum(p.weight * amm for p, amm in order.products.items())
         driver_emissions: Dict[Driver, float] = dict()
         driver_search_result: Dict[Driver, SearchResult] = dict()
+
+        warehouse_nodes = {
+            tuple(self.warehouse_points[x] for x in w) for w in where_to_get.values()
+        }
+        print("warehouse_nodes", warehouse_nodes)
+
         for driver, node in [
-            driver
-            for driver in self.available_drivers.items()
+            (driver, node)
+            for driver, node in self.available_drivers.items()
             if driver.veichle.weight_cap >= order_weight
         ]:
             search = DeliverySearch(
@@ -192,14 +205,12 @@ class Simulation:
                     ),
                 ),
             )
-            warehouse_nodes = {
-                tuple(self.warehouse_points[x] for x in w)
-                for w in where_to_get.values()
-            }
+            driver.calc_order_path(order)
             where_to_go = warehouse_nodes.union({end_node})
             res = search.run(node, end_node, warehouse_nodes)
             driver_emissions[driver] = self.path_emissions(driver.veichle, res.path)
             driver_search_result[driver] = res
+
             print(
                 f"""
         driver:{driver.name}
@@ -214,6 +225,7 @@ class Simulation:
 
         if len(drivers) == 0:
             raise Exception("No available driver")
+
         self.send_driver(order, drivers[0], res)
 
     def place_order_command(
@@ -238,6 +250,7 @@ class Simulation:
         time_limit = input("em quantos minutos? ")
 
         order = Order(
+            self.clock,
             self.clock + int(time_limit) * 60,
             self.places[order_place],
             {d[i]: choice_number_list.count(i) for i in choice_number_list},
@@ -246,14 +259,16 @@ class Simulation:
         print("it weighs ", order.weight(), " kgs")
         self.pending_orders.append(order)
 
-    def send_driver(self, order, driver: Driver, res: SearchResultOnMap):
+    def send_driver(self, order: Order, driver: Driver, res: SearchResultOnMap):
         d_node = self.available_drivers[driver]
         self.available_drivers.pop(driver)
         self.drivers_in_transit.append(driver)
-        driver.set_pseudo_route(res.pseudo_route)
-        driver.set_path(res.path)
+        driver.curr_node = d_node
         driver.curr_order = order
+        driver.set_pseudo_route(res.pseudo_route)
+        driver.current_order = order
         driver.warehouses = self.warehouse_points
+        driver.set_path(res.path)
         driver.last_search = res
         print(driver, " goin")
 
@@ -262,27 +277,34 @@ class Simulation:
         for driver in self.drivers_in_transit:
             print(driver)
 
-    def plot_driver_command(self):
-        for driver in self.drivers_in_transit:
-            print(driver.name, " : ", driver.id)
-            print(driver)
+    def plot_driver_command(self, driver: Driver = None):
+        if not driver:
+            for driver in self.drivers_in_transit:
+                print(driver.name, " : ", driver.id)
+                print(driver)
 
-        driver_id = input("qual id? ")
-        d: Driver = self.drivers[int(driver_id)]
-        search: SearchResultOnMap = d.last_search
+            driver_id = input("qual id? ")
+            driver: Driver = self.drivers[int(driver_id)]
+
+        search: SearchResultOnMap = driver.last_search
         fig, ax = search.plot(show=False)
 
-        edge_labels = {d.curr_edge: d.name + "{:.2f}m".format(d.progress_along_edge)}
+        print("uppon plotting driver.curr_edge is", driver.curr_edge)
+        if driver.curr_edge:
+            edge_labels = {
+                driver.curr_edge: driver.name
+                + "{:.2f}m".format(driver.progress_along_edge)
+            }
 
-        nx.draw_networkx_edge_labels(
-            self.map.graph,
-            self.map._render_positions,
-            edge_labels=edge_labels,
-            font_color="w",
-            font_size=8,
-            bbox=dict(facecolor="red", alpha=0.1),
-            ax=ax,
-        )
+            nx.draw_networkx_edge_labels(
+                self.map.graph,
+                self.map._render_positions,
+                edge_labels=edge_labels,
+                font_color="w",
+                font_size=8,
+                bbox=dict(facecolor="red", alpha=0.1),
+                ax=ax,
+            )
         plt.show()
 
     def plot_command(self, *args):

@@ -101,10 +101,17 @@ class Warehouse:
 class Order:
     _id = 0
 
-    def __init__(self, time: int, place: Place, products: Dict[Product, int]):
+    def __init__(
+        self,
+        curr_time: int,
+        time_limit: int,
+        place: Place,
+        products: Dict[Product, int],
+    ):
         self.id = Order._id
         Order._id += 1
-        self.time_limit: int = time
+        self.dispatch_time: int = curr_time
+        self.time_limit: int = time_limit
         self.destination: Place = place
         self.products: Dict[Product, int] = products
 

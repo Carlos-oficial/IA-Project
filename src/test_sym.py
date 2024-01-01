@@ -14,13 +14,13 @@ m = Map.from_map_gen_state(s)
 
 
 center = m.central_node()
-j = Driver("Júlio", Bike(), m)
-
+j = Driver("Júlio", Bike(), m, center)
+c = Driver("Carlos", Bike(), m, center)
 dirvers = {
     j: center,
-    Driver("Carlos", Bike(), m): center,
-    Driver("Gerson", Car(), m): center,
-    Driver("Filipe", Bycicle(), m): center,
+    c: center,
+    Driver("Gerson", Car(), m, center): center,
+    Driver("Filipe", Bycicle(), m, center): center,
 }
 
 
@@ -29,11 +29,12 @@ s.difficulty = Simulation.Dificulty.NORMAL
 
 d = {p.name: p for p in s.products}
 d["Pao"]
-order = Order(s.clock + 300, s.places["HI"], {d["Pao"]: 2, d["Carne"]: 1})
+order = Order(s.clock, s.clock + 300, s.places["HI"], {d["Pao"]: 2, d["Carne"]: 1})
 s.pending_orders.append(order)
-# s.tick()
+s.skip(50)
+s.plot_driver_command(c)
 
 
-A = m.get_node_by_name("A")
-CO = m.get_node_by_name("CO")
-print(s.estimated_time_btwn_points(j, order, A, CO))
+# A = m.get_node_by_name("A")
+# CO = m.get_node_by_name("CO")
+# print(s.estimated_time_btwn_points(j, order, A, CO))
