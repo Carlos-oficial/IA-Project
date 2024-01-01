@@ -375,9 +375,20 @@ class Simulation:
         ax.set_title(self)
         plt.show()
 
+    def traffic_command(self, *args):
+        if len(args) == 0:
+            print("Usage: traffic <road_name> <traffic_level>")
+            return
+        road_name = args[0]
+        traffic_level = float(args[1])
+        for road in self.map.roads:
+            if road.name == road_name:
+                road.set_traffic(traffic_level)
+                break
 
     def help(self):
-        descp = { 
+        descp = {
+            "traffic - Sets the traffic level of a road",
             "tick - Advances N ticks in time, by default advances one",
             "plot - Shows the map (nodes, drivers, warehouses, etc)",
             "order - Adds an order to the sistem",
@@ -416,6 +427,7 @@ class Simulation:
 
     def ui(self):
         commands = { 
+            "traffic": self.traffic_command,
             "tick": self.skip,
             "plot": self.plot_command,
             "order": self.place_order_command,
