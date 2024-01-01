@@ -146,6 +146,13 @@ class Simulation:
             / min(driver.veichle.calc_max_velocity(cargo=order.weight()), min_max_speed)
         )
 
+    def estimated_time_in_road(self, driver, order, x, y):
+        road: Road = self.map.roads_mapped[x][y]
+        vel = min(
+            driver.veichle.calc_max_velocity(cargo=order.weight()), road.max_speed()
+        )
+        return 3.6 * road.length / vel
+
     def dispatch_order(self, order: Order):
         print("Dispatching", order)
         end_node = order.destination
@@ -169,36 +176,39 @@ class Simulation:
         order_weight = sum(p.weight * amm for p, amm in order.products.items())
         driver_emissions: Dict[Driver, float] = dict()
         driver_search_result: Dict[Driver, SearchResult] = dict()
-        for driver, node in self.available_drivers.items():
-            if driver.veichle.weight_cap >= order_weight:
-                search = DeliverySearch(
+        for driver, node in [
+            driver
+            for driver in self.available_drivers.items()
+            if driver.veichle.weight_cap >= order_weight
+        ]:
+            search = DeliverySearch(
+                self.map,
+                lambda x, y: self.estimated_time_btwn_points(driver, order, x, y),
+                AStar(
                     self.map,
-                    # self.map.distance,
-                    lambda x, y: self.estimated_time_btwn_points(driver, order, x, y),
-                    AStar(
-                        self.map,
-                        h=lambda x, y: self.estimated_time_btwn_points(
-                            driver, order, x, y
-                        ),
+                    h=lambda x, y: self.estimated_time_btwn_points(driver, order, x, y),
+                    cost_function=lambda x, y: self.estimated_time_in_road(
+                        driver, order, x, y
                     ),
-                )
-                warehouse_nodes = {
-                    tuple(self.warehouse_points[x] for x in w)
-                    for w in where_to_get.values()
-                }
-                where_to_go = warehouse_nodes.union({end_node})
-                res = search.run(node, end_node, warehouse_nodes)
-                driver_emissions[driver] = self.path_emissions(driver.veichle, res.path)
-                driver_search_result[driver] = res
-                print(
-                    f"""
-            driver:{driver.name}
-            veichle: {driver.veichle.__class__.__name__} 
-            {self.map.path_length(res.path)/1000} km
-            {self.path_emissions(driver.veichle,res.path)}g of CO2 
-            estimated_time: {int(self.approx_path_time(driver.veichle,order.weight(),res.path)/60)}:{int(self.approx_path_time(driver.veichle,order.weight(),res.path))%60}
-            """
-                )
+                ),
+            )
+            warehouse_nodes = {
+                tuple(self.warehouse_points[x] for x in w)
+                for w in where_to_get.values()
+            }
+            where_to_go = warehouse_nodes.union({end_node})
+            res = search.run(node, end_node, warehouse_nodes)
+            driver_emissions[driver] = self.path_emissions(driver.veichle, res.path)
+            driver_search_result[driver] = res
+            print(
+                f"""
+        driver:{driver.name}
+        veichle: {driver.veichle.__class__.__name__} 
+        {self.map.path_length(res.path)/1000} km
+        {self.path_emissions(driver.veichle,res.path)}g of CO2 
+        estimated_time: {int(self.approx_path_time(driver.veichle,order.weight(),res.path)/60)}:{int(self.approx_path_time(driver.veichle,order.weight(),res.path))%60}
+        """
+            )
         drivers = list(driver_emissions.keys())
         drivers = sorted(drivers, key=lambda x: driver_emissions[x])
 

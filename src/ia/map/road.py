@@ -26,7 +26,7 @@ class Road:
         elif self.weather == Weather.Rainy:
             return 0.8
         else:
-            return 1.0  # No impact on speed for other weather conditions
+            return 1.0
 
     def get_destination(self) -> Place:
         return self.to
