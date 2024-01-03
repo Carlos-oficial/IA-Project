@@ -8,11 +8,13 @@ from ia.map.search import *
 from ia.sym import Simulation
 from ia.ui.map_generator import MapGenerator, MapGeneratorState
 
+'''
 class InteractiveMap:
     def __init__(self):
         self.map_location = None
         self.nodes = set()
         self.nodes_src_dest = set()
+        self.restriction = set()
         self.algorithm = None
         self.algorithms_available = {
             "AStar": AStar,
@@ -61,15 +63,20 @@ class InteractiveMap:
     def run(self, map_instance: Map):
         try:
             if self.algorithm in {"TourSearch", "RestrictedTourSearch", "AndOrRestrictedTourSearch", "DeliverySearch"}:
-                node_src = self.nodes_src_dest.pop() if self.nodes_src_dest else None
                 node_dest = self.nodes_src_dest.pop() if self.nodes_src_dest else None
+                node_src = self.nodes_src_dest.pop() if self.nodes_src_dest else None
                 classic_algorithm = input("Digite o nome do algoritmo clássico a ser utilizado: ")
                 alg_class = self.algorithms_available.get(classic_algorithm)
                 if alg_class:
                     alg = alg_class(map_instance, map_instance.distance)
                 else:
                     raise Exception("Algoritmo não encontrado")
-                res = alg.run(node_src, node_dest, self.nodes)
+                
+                #O ERROO ESTA POR AQUI
+                algoritmo = self.algorithms_available.get(self.algorithm)
+                algoritmo1 = algoritmo(map_instance, map_instance.distance, alg)
+
+                res = algoritmo1.run(node_src, node_dest, self.nodes)
                 res.plot()
                 print(res)
             else:
@@ -98,18 +105,16 @@ if __name__ == "__main__":
     interactive_map.choose_algorithm()
 
     interactive_map.run(map_instance)
+'''
 
 
 
 
-"""
 # s = MapGenerator.run()
 
 
 map = Map("Gualtar, PT", "file")
 map.fetch_map()
-map.plot()
-
 
 A = map.get_node_by_name("A")
 CO = map.get_node_by_name("CO")
@@ -122,12 +127,10 @@ alg = AStar(map, map.distance)
 route_alg = AndOrRestrictedTourSearch(map, map.distance, alg)
 route_alg2 = DeliverySearch(map, map.distance, alg)
 
-res = alg.run(A, HI)
+res = alg.run(IG, CO)
 # res1.plot()
 # res2 = route_alg2.run(A, IG, {A, HI, (CO, FY)})
 # res2.plot()
 res.plot()
 print(res)
 # AA AJ GA GG HI
-
-"""
