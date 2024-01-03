@@ -97,7 +97,6 @@ class Driver:
         dest = {p: n for n, p in self.map.places.items()}[order.destination]
         res = search.run(self.curr_node, dest, warehouse_nodes)
         self.last_search = res
-        res.plot()
         return res
 
     # def update_path(self,curr_time =self.clock):
