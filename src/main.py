@@ -8,8 +8,8 @@ from ia.map.search import *
 from ia.sym import Simulation
 from ia.ui.map_generator import MapGenerator, MapGeneratorState
 
-# s = MapGenerator.run()
-s = MapGeneratorState.load_from_file("Gualtar")
+s = MapGenerator.run()
+# s = MapGeneratorState.load_from_file("Gualtar")
 map = Map.from_map_gen_state(s)
 
 center = map.central_node()
