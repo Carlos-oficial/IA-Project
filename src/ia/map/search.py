@@ -100,12 +100,12 @@ class SearchResultOnMap(SearchResult):
             ax=ax,
         )
 
-        # for node, (x, y) in [
-        #     (node, (x, y))
-        #     for (node, (x, y)) in self.map._render_positions.items()
-        #     if node in self.nodes_to_highlight
-        # ]:
-        #     plt.scatter(x, y, color="blue", marker="o", s=30)
+        for node, (x, y) in [
+            (node, (x, y))
+            for (node, (x, y)) in self.map._render_positions.items()
+            if node in self.nodes_to_highlight
+        ]:
+            plt.scatter(x, y, color="blue", marker="o", s=30)
 
         start = self.path[0]
         end = self.path[-1]
@@ -473,7 +473,7 @@ class DeliverySearch(Search):
         """
         self.nodes_in_tour = [src]
         self.curr_path = self.alg.run(src, dest, reset=True)
-        restrictions = {dest: order_restrictions}
+        restrictions = {dest: {k for k in order_restrictions}}
         completed = set()
         curr_node = src
         route = [src]
@@ -551,5 +551,5 @@ class DeliverySearch(Search):
             route,
             pseudo_route=self.pseudo_route,
             map=self.map,
-            nodes_to_highlight={node for node in self.nodes_in_tour},
+            nodes_to_highlight={node for node in self.pseudo_route},
         )

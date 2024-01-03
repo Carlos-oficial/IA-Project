@@ -84,7 +84,7 @@ class Simulation:
             # self.handle_order_delivered(driver,order)
             self.drivers
 
-    def skip(self, ticks: int):
+    def skip(self, ticks=1):
         for i in range(0, int(ticks)):
             self.tick()
 
@@ -207,19 +207,27 @@ class Simulation:
             )
             driver.calc_order_path(order)
             where_to_go = warehouse_nodes.union({end_node})
+
             res = search.run(node, end_node, warehouse_nodes)
-            driver_emissions[driver] = self.path_emissions(driver.veichle, res.path)
-            driver_search_result[driver] = res
+            print(f"res = search.run{(node, end_node, warehouse_nodes)}")
+
+            if (
+                self.approx_path_time(driver.veichle, order.weight(), res.path)
+                <= order.time_limit
+            ):
+                driver_emissions[driver] = self.path_emissions(driver.veichle, res.path)
+                driver_search_result[driver] = res
 
             print(
                 f"""
-        driver:{driver.name}
-        veichle: {driver.veichle.__class__.__name__} 
-        {self.map.path_length(res.path)/1000} km
-        {self.path_emissions(driver.veichle,res.path)}g of CO2 
-        estimated_time: {int(self.approx_path_time(driver.veichle,order.weight(),res.path)/60)}:{int(self.approx_path_time(driver.veichle,order.weight(),res.path))%60}
-        """
+                    driver:{driver.name}
+                    veichle: {driver.veichle.__class__.__name__} 
+                    {self.map.path_length(res.path)/1000} km
+                    {self.path_emissions(driver.veichle,res.path)}g of CO2 
+                    estimated_time: {int(self.approx_path_time(driver.veichle,order.weight(),res.path)/60)}:{int(self.approx_path_time(driver.veichle,order.weight(),res.path))%60}
+                    """
             )
+
         drivers = list(driver_emissions.keys())
         drivers = sorted(drivers, key=lambda x: driver_emissions[x])
 
@@ -286,10 +294,26 @@ class Simulation:
         road: Road = self.map.roads_mapped[N2][N1]
         road.set_traffic(traffic_level)
 
+    def cut_road_command(self, *args):
+        node1 = args[0]
+        node2 = args[1]
+        N1 = self.map.get_node_by_name(node1)
+        N2 = self.map.get_node_by_name(node2)
+        road: Road = self.map.roads_mapped[N1][N2]
+        road.open = not road.open
+        road: Road = self.map.roads_mapped[N2][N1]
+        road.open = not road.open
+
     def drivers_command(self):
+        print("avalailable")
+        for driver in self.available_drivers:
+            print(driver)
+            print(str(driver.get_avg_rating()) + " estrelas em média")
+
         print("drivers in transit")
         for driver in self.drivers_in_transit:
             print(driver)
+            print(str(driver.get_avg_rating()) + " estrelas em média")
 
     def plot_driver_command(self, driver: Driver = None):
         if not driver:
@@ -304,6 +328,7 @@ class Simulation:
         fig, ax = search.plot(show=False)
 
         print("uppon plotting driver.curr_edge is", driver.curr_edge)
+
         if driver.curr_edge:
             edge_labels = {
                 driver.curr_edge: driver.name
@@ -497,6 +522,7 @@ class Simulation:
         commands = {
             "tick": self.skip,
             "traffic": self.traffic_command,
+            "cut": self.cut_road_command,
             "plot": self.plot_command,
             "order": self.place_order_command,
             "orders": self.orders_command,

@@ -38,6 +38,8 @@ class Road:
         return self.weather
 
     def max_speed(self) -> float:
+        if not self.open:
+            return 0.00000001
         max_speed = self.vel_cap
         length = self.length
         weather_factor = self.get_weather_factor()

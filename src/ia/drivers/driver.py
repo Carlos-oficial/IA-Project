@@ -33,7 +33,7 @@ class Driver:
         self.progress_along_edge: float = 0.0
         self.cargo: {Product: int} = dict()
         self.veichle: Veichle = veichle
-        self.ratings: List[float] = 0
+        self.ratings: List[float] = []
         self.going_path = list()
         self.last_search = None
         self.current_order: Order = None
@@ -48,8 +48,13 @@ class Driver:
             """ + (
             f"aka {self.map._node_names[self.curr_edge[0]],self.map._node_names[self.curr_edge[1]]})\n"
             if self.curr_edge is not None
-            else "\n" ""
+            else "\n" "" + f"{self.get_avg_rating()}"
         )
+
+    def get_avg_rating(self):
+        if not len(self.ratings):
+            return 5
+        return sum(self.ratings) / len(self.ratings)
 
     def where_to_get(self, order: Order):
         dispatched_products = set()
@@ -92,6 +97,7 @@ class Driver:
         dest = {p: n for n, p in self.map.places.items()}[order.destination]
         res = search.run(self.curr_node, dest, warehouse_nodes)
         self.last_search = res
+        res.plot()
         return res
 
     # def update_path(self,curr_time =self.clock):
@@ -104,12 +110,14 @@ class Driver:
     #     self.warehouses = self.warehouse_points
     #     print(driver, " goin")
 
-    def pickup_products(cargo: Dict[Product, int]):
+    def pickup_products(self, cargo: Dict[Product, int]):
         for product, ammount in cargo.items():
             if self.cargo.get(product):
                 self.cargo[product] += ammount
+                self.curr_order.products[product] -= ammount
             else:
                 self.cargo[product] = ammount
+                self.curr_order.products[product] -= ammount
 
     def set_pseudo_route(self, route):
         self.pseudo_route = route
@@ -132,21 +140,16 @@ class Driver:
     def advance(self, sym_time, seconds=1) -> bool:
         self.time_left_upper_bound -= seconds
         u, v = self.curr_edge
-        print("edge: ", self.curr_edge)
         self.curr_road = self.map.roads_mapped[u][v]
         road_max_speed = self.curr_road.max_speed()
         veichle_max_speed = self.veichle.calc_max_velocity(
             cargo=sum(self.cargo.values())
         )
+
         speed = min(road_max_speed, veichle_max_speed)
         distance = speed / 3.6
         self.progress_along_edge += distance
         road_len = self.curr_road.length
-
-        # print("time elapsed",sym_time - self.current_order.dispatch_time)
-        # print("time left",self.map.estimated_time_in_path(self.to_go,max_speed=veichle_max_speed)-self.progress_along_edge*3.6/veichle_max_speed)
-        # print("time limit",self.current_order.time_limit - sym_time)
-        # print("time_left_upper_bound",self.time_left_upper_bound)
 
         time_left = (
             self.map.estimated_time_in_path(self.to_go, max_speed=veichle_max_speed)
@@ -154,15 +157,28 @@ class Driver:
         )
         if self.progress_along_edge >= road_len:
             self.progress_along_edge = 0.0
-            node = self.to_go.pop(0)
+            self.curr_node = self.to_go.pop(0)
+            print(self.map._node_names[self.curr_node])
+            if len(self.to_go) <= 1:
+                self.curr_node = self.to_go[-1]
+
+                def show_time(time):
+                    return f"{int(time/3600)}:{int(time/60)}:{int(time%60)}"
+
+                self.add_rating(
+                    input(
+                        f"era suposto chegar{show_time(self.curr_order.time_limit)}, chegou {show_time(sym_time)} quantas estrelas?"
+                    )
+                )
+                return True
+            # avança de estrada
             u, v = self.to_go[0], self.to_go[1]
             self.curr_edge = u, v
-
-            if node == self.pseudo_route[0]:
+            if self.curr_node == self.pseudo_route[0]:
                 self.pseudo_route.pop(0)
                 w = {
                     node: warehouse for warehouse, node in self.warehouses.items()
-                }.get(node)
+                }.get(self.curr_node)
                 if w:  # at a warehouse
                     keys_to_remove = []
 
@@ -175,16 +191,24 @@ class Driver:
                     for key in keys_to_remove:
                         self.curr_order.products.pop(key)
 
-            if True:  # time_left>self.time_left_upper_bound:
-                print("we here")
-                self.calc_order_path(self.curr_order)
+            if time_left > self.time_left_upper_bound:
+                print(self.map._node_names[self.curr_node])
+                self.to_go = self.calc_order_path(self.curr_order).path
                 new_time = time_left
                 self.time_left_upper_bound = new_time * 1.1
 
             if len(self.to_go) <= 1:
                 self.curr_node = self.to_go[-1]
+
+                def show_time(time):
+                    return f"{int(time/3600)}:{int(time/60)}:{int(time%60)}"
+
+                self.add_rating(
+                    input(
+                        f"era suposto chegar{show_time(self.curr_order.time_limit)}, chegou {show_time(sym_time)} quantas estrelas?"
+                    )
+                )
                 return True
-            # avança de estrada
 
             u, v = self.to_go[0], self.to_go[1]
             self.curr_road = self.map.roads_mapped[u][v]
