@@ -272,6 +272,20 @@ class Simulation:
         driver.last_search = res
         print(driver, " goin")
 
+    def traffic_command(self, *args):
+        if len(args) == 0:
+            print("Usage: traffic <node1> <node2> <traffic_level>")
+            return
+        node1 = args[0]
+        node2 = args[1]
+        traffic_level = float(args[2])
+        N1 = self.map.get_node_by_name(node1)
+        N2 = self.map.get_node_by_name(node2)
+        road: Road = self.map.roads_mapped[N1][N2]
+        road.set_traffic(traffic_level)
+        road: Road = self.map.roads_mapped[N2][N1]
+        road.set_traffic(traffic_level)
+
     def drivers_command(self):
         print("drivers in transit")
         for driver in self.drivers_in_transit:
@@ -440,6 +454,7 @@ class Simulation:
     def help(self):
         descp = {
             "tick - Advances N ticks in time, by default advances one",
+            "traffic - Sets the traffic level of a road:",
             "plot - Shows the map (nodes, drivers, warehouses, etc)",
             "order - Adds an order to the sistem",
             "orders - Shows the orders in the sistem",
@@ -481,6 +496,7 @@ class Simulation:
     def ui(self):
         commands = {
             "tick": self.skip,
+            "traffic": self.traffic_command,
             "plot": self.plot_command,
             "order": self.place_order_command,
             "orders": self.orders_command,
